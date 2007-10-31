@@ -429,8 +429,8 @@ function parseTableCells(){
          }
          else if (oElement.innerHTML == '<b>Island of destination</b>') {
            var msg = "<b>Island of destination</b>" + "<select onchange=\"var coords=this.value.match(/(\\d+):(\\d+):(\\d+)/); document.getElementsByName('form[pos1]')[0].value = coords[1]; document.getElementsByName('form[pos2]')[0].value = coords[2]; document.getElementsByName('form[pos3]')[0].value = coords[3];\">";
-           for (i=0;i<numIslands-1;i++) {
-             var name = GM_getValue('Name'+i);
+           for (i=0;i<numIslands+1;i++) {
+             var name = getValue('Name'+i);
              var split = name.match(/(.+)\((.+)\)/);
              var isle = split[1];
              var coords = split[2];
