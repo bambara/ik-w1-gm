@@ -427,6 +427,18 @@ function parseTableCells(){
          if (oElement.innerHTML == '<b>New order</b>') {
             oElement.innerHTML = "<span style='float: left; font-weight: bold;'>New order</span><span style='float: right;'><input type='button' value='Fleetsave' onclick='var df = document.forms[document.forms.length-1]; var dfe = df.elements; if (dfe[0].value == 0) { dfe[0].value = 1; dfe[1].value = 1; dfe[2].value = 1; } for (var i = 3; i < dfe.length - 3; ++i) { var a = dfe[i].parentNode.parentNode.innerHTML.match(/<b>(.+?) \\((\\d+)\\)<\\/b>/i); if (a) { dfe[i].value = parseInt(a[2]); } } df.action += \"&a=fleetsave\"; dfe[dfe.length-3].click();'>";
          }
+         else if (oElement.innerHTML == '<b>Island of destination</b>') {
+           var msg = "<b>Island of destination</b>" + "<select onchange=\"var coords=this.value.match(/(\\d+):(\\d+):(\\d+)/); document.getElementsByName('form[pos1]')[0].value = coords[1]; document.getElementsByName('form[pos2]')[0].value = coords[2]; document.getElementsByName('form[pos3]')[0].value = coords[3];\">";
+           for (i=0;i<numIslands-1;i++) {
+             var name = GM_getValue('Name'+i);
+             var split = name.match(/(.+)\((.+)\)/);
+             var isle = split[1];
+             var coords = split[2];
+             msg += "<option value='" + coords + "'>" + name + "</option>";
+           }
+           msg += "</select>";
+           oElement.innerHTML = msg; 
+         }
       }
    }
    
