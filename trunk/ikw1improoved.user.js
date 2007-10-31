@@ -114,13 +114,13 @@ DateHelper.getDuration = function (seconds) {
    if (seconds == 0) {
       return "Finished";
    }
-   
+
    var msg = "";
    var days, hours, minutes;
    if (seconds >= 86400) { days = Math.floor(seconds / 86400); seconds = seconds - (days * 86400); }
-   if (seconds >= 3600) { hours = Math.floor(seconds / 3600); seconds = seconds - (hours * 3600); } 
+   if (seconds >= 3600) { hours = Math.floor(seconds / 3600); seconds = seconds - (hours * 3600); }
    if (seconds >= 60) { minutes = Math.floor(seconds / 60); seconds = seconds - (minutes * 60); }
-   
+
    if (days > 0) {
       msg += days + " " + TextHelper.pluralize( days, "day", "days" ) + " ";
    }
@@ -128,7 +128,7 @@ DateHelper.getDuration = function (seconds) {
       msg += hours + " " + TextHelper.pluralize ( hours, "hour", "hours" ) + " ";
    }
    if (minutes > 0) {
-      msg += minutes + " " + TextHelper.pluralize( minutes, "minute", "minutes" ) + " "; 
+      msg += minutes + " " + TextHelper.pluralize( minutes, "minute", "minutes" ) + " ";
    }
    if (seconds > 0) {
       msg += seconds + " " + TextHelper.pluralize( seconds, "second", "seconds" );
@@ -142,7 +142,7 @@ TextHelper.pluralize = function( count, singular, plural ) {
    if ( count == 1 ) {
       return singular;
    }
-   
+
    return plural;
 }
 
@@ -159,7 +159,7 @@ DateHelper.getDateTime = function (time) {
 };
 
 function init(){
-   
+
    var scripts = document.getElementsByTagName('script');
    for( var i = 0, oElement; oElement = scripts[i]; ++i ) {
       // deze regexp werkt niet global! maar als ik g vlag bijvoeg, wil het helemaal niet meer matchen.
@@ -169,11 +169,11 @@ function init(){
          clocks[a[1]] = parseInt(a[2]);
       }
    }
-   
+
    //add titles to the images you might find
    //does not have much use, Sven should have made it better!
    var imgs = document.images;
-   
+
    for (var im = 0; im < imgs.length; ++im) {
       var imsrc = imgs[im].src;
       var filestart = imsrc.lastIndexOf("/");
@@ -183,23 +183,23 @@ function init(){
          imgs[im].title = imtitles[filename];
       }
    }
-   
+
    getPlayerName();
-   
+
    addTableElements();
-   
+
    parseTables();
-   
+
    parseTableCells();
-   
+
    parseIn();
-   
+
    parseDivs();
-   
+
    parseBolds();
-   
+
    parseMap();
-   
+
    // start some clocks
    if (startStoreClock) {
       new newClock(timer, document.getElementById("goldin"), goldin);
@@ -209,7 +209,7 @@ function init(){
    if (startOrderClock) {
       new newClock(timer, document.getElementById("ordersdonein"), orderTotalTime);
    }
-   
+
    // add a menu for easier browsing
    var msg = "<a href='http://213.203.194.123/us/1/index.php?s=" + gup('s') + "&p=b1'>Main House</a>";
    msg += "&nbsp;-&nbsp;<a href='http://213.203.194.123/us/1/index.php?s=" + gup('s') + "&p=b5'>Laboratory</a>";
@@ -219,10 +219,10 @@ function init(){
    var theDIV = document.createElement('div');
    theDIV.style.padding = '10px';
    theDIV.style.paddingBottom = '0px';
-   
+
    theDIV.innerHTML = msg;
    pseudoInsertAfter(theDIV, tables[0]);
-   
+
    // clean-up
    cells = null;
    divs = null;
@@ -265,16 +265,16 @@ function parseTables(){
          var rows = tables[i].getElementsByTagName('tr');
          // on lab page a table can have 0 rows (probably research table after research is all done)
          if (rows.length > 0) {
-            numIslands = rows.length;
             var dataRows = rows[0].getElementsByTagName('td');
             var numcells = dataRows.length;  // 6 for resources, 4 for fleet, 3 for alliance pages
             if (dataRows[0].innerHTML == '<b>New order</b>') { // harbour page, orders
                // preparation to show how much units and resources you can ship
                var newrow = tables[i].insertRow(rows.length - 1);
+               tables[i].style.width = '40%';
                newrow.insertCell(0).innerHTML = "Units: <span id='orders_units'>0</span> Resources: <span id='orders_res'>0</span>";
                newrow.insertCell(1); // visuals
             }
-            
+
             else if (dataRows[0].innerHTML == '<b>Transport</b>' || dataRows[0].innerHTML == '<b>Attack</b>' ) { // shipping orders
                for (var r = 1; r < rows.length; ++r) {
                   if (rows[r].getElementsByTagName('td')[0].innerHTML.indexOf('<b>Army (') == 0) {
@@ -285,7 +285,7 @@ function parseTables(){
                   }
                }
             }
-            
+
             else if (dataRows[0].innerHTML == '<b>Members</b>') { // alliance, members page
                // make a list with all members in mailable format at bottom
                // - collect in array
@@ -296,27 +296,27 @@ function parseTables(){
                   var a = rows[r].getElementsByTagName('td')[0].innerHTML.match(/.*\>(.+?)</);
                   allmembers.push(a[1]);
                }
-               
+
                var newDiv = document.createElement('div');
                newDiv.id = 'membersinfo';
-               
+
                var msg = '<h3>' + allmembers.length + ' members</h3>';
                msg += '<table><tr><td width="10"></td><td><b>Members</b></td></tr>';
                for (var i = 0, sc = 1; i < allmembers.length; i += 50, ++sc) {
                   var segment = allmembers.slice(i, i+50);
                   msg += "<tr><td>" + sc + "</td><td>" + segment.join(' ; ') + "</td></tr>";
                }
-               
+
                msg += '</table>';
-               
+
                newDiv.innerHTML = msg;
                document.body.appendChild(newDiv);
             }
-            
+
             else if (dataRows[0].innerHTML == '<b>Events</b>') { // events page
                // add a delete button on top of the table
                dataRows[0].innerHTML = "<span style='float: left; font-weight: bold;'>Events</span><span style='float: right;'><input type='button' value='Delete' onclick='document.getElementById(\"events\").submit();'></span>";
-               
+
                // select unseen and thus new events of transport to you automatically
                // will not select already seen transports to you, because it assumes
                // you want to keep them otherwise you'd have deleted them yourself
@@ -336,7 +336,7 @@ var cells = 0;
 
 function parseTableCells(){
    cells = document.getElementsByTagName('td');
-   
+
    for( var i = 0, oElement, cellcount = 0; oElement = cells[i]; ++i ) {
       var a = oElement.innerHTML.match(/\>.+?\>(.+?)\(Level (\d+)\).*Gold:\s+(\d+)\s+Stone:\s+(\d+)\s+Lumber:\s+(\d+)\s+Duration:\s+(\d+:\d+:\d+)/i);
       if(!a){
@@ -357,11 +357,11 @@ function parseTableCells(){
          durs[durs.length] = DateHelper.toSeconds(b[5]);
       }
    }
-   
-   
+
+
    // go over again and add new info
    for( var i = 0, oElement; oElement = cells[i]; i++ ) {
-      
+
       if( oElement.innerHTML.indexOf("gold.gif") > -1 ) {
          var a = oElement.innerHTML.match(/\> (.+)/);
          gold = parseInt(a[1]);
@@ -383,9 +383,9 @@ function parseTableCells(){
             oElement.innerHTML += "<form action='" + a[1] + "&p=map&zoom=&pos1=" + a[2] + "&pos2=" + a[3] + "' method='post'><input type='submit' value='On map'></form>";
             oElement.innerHTML += "<form action='" + a[1] + "&p=calculator&sub=distance' method='post'><input type='hidden' value='" + a[2] + "' name='form[pos1]'><input type='hidden' value='" + a[3] + "' name='form[pos2]'><input type='hidden' value='" + a[4] + "' name='form[pos3]'><b>Distance and Arrival</b>, at <input type='text' value='5' name='form[speed]' size='2'> knots: <input type='submit' value='Calculate'></form>";
          }
-         
+
       }
-      
+
       else if (gup('p') == 'b1') {
          var a = oElement.innerHTML.match(/(.+) \(Level (\d+)\)/);
          //var a = oElement.innerHTML.match(/(\w+(?: \w+)?)(?: \(Level (\d+)\))?/);
@@ -411,7 +411,7 @@ function parseTableCells(){
                if (!goldprod) goldprod = 306;
                if (!stoneprod) stoneprod = 191;
                if (!woodprod) woodprod = 230;
-               
+
                var stores = Math.floor(Math.pow(1.2, parseInt(a[2])) * 1000);
                cells[i+1].innerHTML = cells[i+1].innerHTML + "<br>Next: " + Math.floor(Math.pow(1.2, parseInt(a[2]) + 1) * 1000);
                goldin = Math.round((stores - gold) * 3600 / goldprod);
@@ -422,14 +422,14 @@ function parseTableCells(){
             }
          }
       }
-      
+
       else if (gup('p') == 'b7') { // harbour
          if (oElement.innerHTML == '<b>New order</b>') {
             oElement.innerHTML = "<span style='float: left; font-weight: bold;'>New order</span><span style='float: right;'><input type='button' value='Fleetsave' onclick='var df = document.forms[document.forms.length-1]; var dfe = df.elements; if (dfe[0].value == 0) { dfe[0].value = 1; dfe[1].value = 1; dfe[2].value = 1; } for (var i = 3; i < dfe.length - 3; ++i) { var a = dfe[i].parentNode.parentNode.innerHTML.match(/<b>(.+?) \\((\\d+)\\)<\\/b>/i); if (a) { dfe[i].value = parseInt(a[2]); } } df.action += \"&a=fleetsave\"; dfe[dfe.length-3].click();'>";
          }
          else if (oElement.innerHTML == '<b>Island of destination</b>') {
-           var msg = "<b>Island of destination</b>" + "<select onchange=\"var coords=this.value.match(/(\\d+):(\\d+):(\\d+)/); document.getElementsByName('form[pos1]')[0].value = coords[1]; document.getElementsByName('form[pos2]')[0].value = coords[2]; document.getElementsByName('form[pos3]')[0].value = coords[3];\">";
-           for (i=0;i<numIslands+1;i++) {
+            var msg = "<b>Island of destination : </b>" + "<select onchange=\"var coords=this.value.match(/(\\d+):(\\d+):(\\d+)/); document.getElementsByName('form[pos1]')[0].value = coords[1]; document.getElementsByName('form[pos2]')[0].value = coords[2]; document.getElementsByName('form[pos3]')[0].value = coords[3];\">";
+           for (i=0;i<getValue('numIslands');i++) {
              var name = getValue('Name'+i);
              var split = name.match(/(.+)\((.+)\)/);
              var isle = split[1];
@@ -437,17 +437,17 @@ function parseTableCells(){
              msg += "<option value='" + coords + "'>" + name + "</option>";
            }
            msg += "</select>";
-           oElement.innerHTML = msg; 
+           oElement.innerHTML = msg;
          }
       }
    }
-   
+
    // mines at max don't show, but they still produce
    if (!goldprod) { goldprod = 306; minesunknown = true; }
    if (!stoneprod) { stoneprod = 191; minesunknown = true; }
    if (!woodprod) { woodprod = 230; minesunknown = true; }
-   
-   
+
+
    // now do it again, but update the times needed
    for( var i = 0, oElement; oElement = cells[i]; i++ ) {
       var a = oElement.innerHTML.match(/(red|ff0000).*>.*(Upgrade to level|Research|Build)/i);
@@ -481,15 +481,15 @@ function parseTableCells(){
          new newClock( timer, document.getElementById("upgr" + i), longestwait );
       }
    }
-   
-   
+
+
    // on mail page, find all matches to xx:yy:zz and replace them with links
    if (gup('p') == 'mail' && gup('sub') == 'show'){
       cells[4].innerHTML = cells[4].innerHTML.replace(/(\d+):(\d+):(\d+)/g, "<a href='http://213.203.194.123/us/1/index.php?s=" + gup('s') + "&p=map&sub=isle&pos1=$1&pos2=$2&pos3=$3' target='_blank'>$1:$2:$3</a>");
       cells[5].innerHTML = cells[5].innerHTML.replace(/(\d+):(\d+):(\d+)/g, "<a href='http://213.203.194.123/us/1/index.php?s=" + gup('s') + "&p=map&sub=isle&pos1=$1&pos2=$2&pos3=$3' target='_blank'>$1:$2:$3</a>");
    }
-   
-   
+
+
    // overloop links, op main page zal je hopelijk storehouse vinden
    if (gup('p') == 'main') {
       var maxStorage = 1000; // just a main house
@@ -550,7 +550,7 @@ function parseIn(){
                                  "<span id='" + numbercounter + "needed'>-</span></div>";
             ++numbercounter;
          }
-         
+
          // update the unit and resources count
          else if (oElement.name == 'form[s1]') { //LWS
             oElement.title = '5 units';
@@ -647,7 +647,7 @@ function parseIn(){
                                              "   document.getElementById('orders_res').innerHTML = resources;"+
                                              "}");
          }
-         
+
          // also on ordering page
          // but it needs a few tricks ;-)
          else if (oElement.name == 'form[u1]') { //stone thrower
@@ -789,7 +789,7 @@ function parseIn(){
          if (oElement.value == 'Train' || oElement.value == 'Build') {
             var par = oElement.parentNode;
             par.style.width = '30%';
-            
+
             var buttX = document.createElement('input');
             buttX.type = 'button';
             buttX.value = 'X';
@@ -797,7 +797,7 @@ function parseIn(){
             buttX.setAttribute('onclick', "var r = parseInt(this.id) - 1; "+
                                            "document.getElementById(r+\"input\").value = 0;");
             par.appendChild(buttX);
-            
+
             par.appendChild(document.createElement('br'));
             var buttMax = document.createElement('input');
             buttMax.type = 'button';
@@ -809,7 +809,7 @@ function parseIn(){
                                             "var maxW = Math.floor("+wood+" / "+woods[numbercounter-1]+");"+
                                             "document.getElementById(r+\"input\").value = Math.min(Math.min(maxG, maxS), maxW);");
             par.appendChild(buttMax);
-            
+
             var buttDay = document.createElement('input');
             buttDay.type = 'button';
             buttDay.value = 'Day';
@@ -823,9 +823,9 @@ function parseIn(){
                                             "document.getElementById(r+\"input\").value = Math.min(amountMax, amountDay);");
             par.appendChild(buttDay);
             buttDay.click();
-            
+
             par.appendChild(document.createElement('br'));
-            
+
             var buttp1 = document.createElement('input');
             buttp1.type = 'button';
             buttp1.value = '+1';
@@ -833,7 +833,7 @@ function parseIn(){
             buttp1.setAttribute('onclick', "var r = parseInt(this.id) - 1; "+
                                             "document.getElementById(r+\"input\").value = parseInt(document.getElementById(r+\"input\").value) + 1;");
             par.appendChild(buttp1);
-            
+
             var buttp5 = document.createElement('input');
             buttp5.type = 'button';
             buttp5.value = '+5';
@@ -841,7 +841,7 @@ function parseIn(){
             buttp5.setAttribute('onclick', "var r = parseInt(this.id) - 1; "+
                                            "document.getElementById(r+\"input\").value = parseInt(document.getElementById(r+\"input\").value) + 5;");
             par.appendChild(buttp5);
-            
+
          }
          else if (oElement.value == 'Next' && gup('a') == 'fleetsave') {
             var totalarmy = 0;
@@ -869,7 +869,7 @@ function parseIn(){
                   "else if (this.form[\"form[s1]\"]) { this.form[\"form[s1]\"].value = 1;");
          }
       }
-      
+
       else if (oElement.type == 'hidden' && gup('sub') == 'presend') {
          var a = oElement.name.match(/form\[(s\d)\]/);
          if (a) {
@@ -895,12 +895,12 @@ function parseDivs(){
    var divs = document.getElementsByTagName('div');
    //	divs[0].style.display = 'none'; // hide advertisements
    for( var i = 0, oElement; oElement = divs[i]; i++ ) {
-      
+
       // add a few links
       if (oElement.className == "signout") {
          oElement.innerHTML = "<a href='http://www.inselkampf.com/index.php?controller=help' target='_blank'>Help</a>&nbsp;&nbsp;" + oElement.innerHTML;
       }
-      
+
       // barracks & harbour & laboratory
       if (oElement.innerHTML.indexOf("All orders:") > -1) {
          var a = oElement.innerHTML.match(/All orders: (.+?)\</i);
@@ -914,15 +914,15 @@ function parseDivs(){
                //alert(items);
                if (!singleGoldCost) { singleGoldCost = golds[items[c[2] + 's']]; }
                orderTotalGold += (c[1] * singleGoldCost);
-               
+
                var singleStoneCost = stones[items[c[2]]];
                if (!singleStoneCost) { singleStoneCost = stones[items[c[2] + 's']]; }
                orderTotalStone += (c[1] * singleStoneCost);
-               
+
                var singleWoodCost = woods[items[c[2]]];
                if (!singleWoodCost) { singleWoodCost = woods[items[c[2] + 's']]; }
                orderTotalWood += (c[1] * singleWoodCost);
-               
+
                if (rr == 0) {
                   // eerste order - 1 doen, omdat hij al bezig is
                   c[1] -= 1;
@@ -934,13 +934,13 @@ function parseDivs(){
                      orderTotalTime += clocks['clock_1'];
                   }
                }
-               
+
                var singleTimeCost = durs[items[c[2]]];
                if (!singleTimeCost) { singleTimeCost = durs[items[c[2] + 's']]; }
                orderTotalTime += (c[1] * singleTimeCost);
             }
          }
-         
+
          if (orderTotalTime != 0) {
             if (orderTotalTime != clocks['clock_0']) {
                // allemaal omdat gewoon innerHTML += niet werkt (breekt id van Duration: of zo)
@@ -954,26 +954,26 @@ function parseDivs(){
                theBOLD.appendChild(theTotalDuration);
                oElement.appendChild(document.createElement('br'));
                oElement.appendChild(theBOLD);
-               
+
                startOrderClock = true;
             }
-            
+
             var theBOLD = document.createElement('b');
             var theInfoText = document.createTextNode('Totals: Gold: ' + orderTotalGold + ' Stone: ' + orderTotalStone + ' Lumber: ' + orderTotalWood);
             theBOLD.appendChild(theInfoText);
-            
+
             oElement.appendChild(document.createElement('br'));
             oElement.appendChild(theBOLD);
-            
+
          }
-         
+
       }
-      
+
       // fix silly typo on the laboratory page
       if (oElement.innerHTML.indexOf("the more") > -1) {
          oElement.innerHTML = oElement.innerHTML.replace(/the more the more/, 'the more');
       }
-      
+
    }
 }
 
@@ -999,7 +999,7 @@ function parseBolds(){
             }
          }
       }
-      
+
       if (buildingaction) {
          var buildinfo = new Array(); // array with build factors, floor(factor*1.2^level)
          // Production rate, factor, Gold, Stone, Lumber
@@ -1009,22 +1009,22 @@ function parseBolds(){
          buildinfo['storehouse'] = [1000, 1.2, 75, 50, 75];
          buildinfo['stonewall'] = [50, 1.25, (250/3), 125, (125/3)];
          buildinfo['watch-tower'] = [1, 1.2, 25, 75, (125/3)];
-         
+
          var thisbuilding = bolds[i-1].innerHTML.match(/\>(.+)/);
          thisbuilding = thisbuilding[1];
          thisbuilding = thisbuilding.toLowerCase();
          thisbuilding = thisbuilding.replace(/\s/g, '');
          var currlevel = Math.round(Math.log(parseFloat(a[1]) / buildinfo[thisbuilding][0]) / Math.log(buildinfo[thisbuilding][1]));
          bolds[i-1].innerHTML += ' (Level ' + currlevel + ')';
-         
+
          // now add some more useful info, like building costs for next levels
          var theDIV = document.createElement('div');
          var msg = '<table class="table"><caption>Building costs</caption><tr><td><b>Level</b></td><td><b>Gold</b></td><td><b>Stone</b></td><td><b>Lumber</b></td><td><b>' + buildingaction + '</b></tr>';
-         
+
          for (var cl = currlevel + 1; cl <= 20; ++cl) {
             msg += '<tr><td>' + cl + '</td><td>' + Math.floor(buildinfo[thisbuilding][2] * Math.pow(1.2, cl)) + '</td><td>' + Math.floor(buildinfo[thisbuilding][3] * Math.pow(1.2, cl)) + '</td><td>' + Math.floor(buildinfo[thisbuilding][4] * Math.pow(1.2, cl)) + '</td><td>' + Math.floor(buildinfo[thisbuilding][0] * Math.pow(buildinfo[thisbuilding][1], cl)) + '</td></tr>';
          }
-         
+
          msg += '</table>';
          theDIV.innerHTML = msg;
          if (currlevel < 20) {
@@ -1041,13 +1041,13 @@ function parseMap(){
    //var areas = document.getElementById('map');
    if (gup('p') == 'map' && gup('sub') == '') {
       var areas = document.getElementsByTagName('area');
-      
+
       var alliances = new Array();
       var unruled = new Array();
       var validislands = 0; // bug in IK source, it lists islands at other edge if looking at this.
-      
+
       for (var i = 0; i < areas.length; ++i) {
-         
+
          var coords = areas[i].coords.split(',');
          var cont = false;
          for (var c = 0; c < coords.length; ++c) {
@@ -1055,12 +1055,12 @@ function parseMap(){
          }
          if (cont) { continue; }
          ++validislands;
-         
+
          var island = areas[i].title.match(/Island: (.*)/);
          var ruler = areas[i].title.match(/Ruler: (.*)/);
          var alliance = areas[i].title.match(/Alliance: (.*)/);
          var score = areas[i].title.match(/Score: (.*)/);
-         if (island) {            
+         if (island) {
             if (!ruler) { // als geen ruler, dan is het rulerless
                var msg = '<a href="' + areas[i].href + '">' + island[1] + "</a>";
                if (score != 1) { msg += ' (' + score[1] + ')'; } // score
@@ -1073,22 +1073,22 @@ function parseMap(){
             }
          }
       }
-      
+
       var newDiv = document.createElement('div');
       newDiv.id = 'mapinfo';
-      
+
       var msg = '<h3>' + validislands + ' islands</h3>';
       msg += '<table><tr><td><b>Alliance</b></td><td><b>Members</b></td><td><b># Islands</b></td></tr>';
-      
+
       for (var alliance in alliances) {
          if (typeof alliances[alliance] != 'function') { // om de prototypes niet te hebben, christus!
             msg += '<tr><td>' + alliance + '</td><td>' + alliances[alliance].unique().join(' ; ') + '</td><td>' + alliances[alliance].length + '</td></tr>';
          }
       }
-      
+
       msg += '</table>';
       msg += '<br><b>Unruled islands:</b> ' + unruled.join(', ');
-      
+
       newDiv.innerHTML = msg;
       document.body.appendChild(newDiv);
    }
@@ -1122,7 +1122,7 @@ function addGlobalStyle(css) {
 function getPlayerName(){
    // get player name
    var divs = document.getElementsByTagName('div');
-   
+
    for(var i=0; i<divs.length; i++){
       if(divs[i].className == 'player'){
          var bolds = divs[i].getElementsByTagName('b');
@@ -1193,20 +1193,19 @@ function parseURL(theURL, isleNum){
                     alert(responseDetails.responseText);
                     document.getElementById('islandtext').innerHTML = "Done!!!"
                 }
-                    
+
             }else{
-               if(isleNum < numIslands - 2){
+               if(isleNum < getValue('numIslands')){
                   document.getElementById('islandtext').innerHTML = "     Loading : "+getValue('Name'+isleNum);
                   parseURLResult(responseDetails.responseText, isleNum);
-                  if((isleNum+1) < numIslands - 2) parseURL(getValue('href'+(isleNum+1)), (isleNum+1));
-                  else{
+                  if((isleNum+1) >= getValue('numIslands')){
                      setValue('updatedate', new Date().toLocaleString());
                      document.getElementById('islandtext').innerHTML = "     Done!!!";
                      document.getElementById('updatedate').innerHTML = getValue('updatedate');
                      location.reload(true);
+                  }else{
+                     parseURL(getValue('href'+(isleNum+1)), (isleNum+1));
                   }
-               }else{
-                  document.getElementById('islandtext').innerHTML = "     Done!!!";
                }
             }
         },
@@ -1217,113 +1216,113 @@ function parseURL(theURL, isleNum){
         }
 
     }); //end xmlrequest
-   
+
 }
 
 function parseURLResult(result, isle){
-   
+
    //buildings
    var mh = result.match(/\>Main House \(Level (.+?)\)/);
    if(mh) setValue('Main House'+isle, mh[1]);
    else setValue('Main House'+isle, 0);
-   
+
    var gm = result.match(/\>Gold Mine \(Level (.+?)\)/);
    if(gm) setValue('Gold Mine'+isle, gm[1]);
    else setValue('Gold Mine'+isle, 0);
-   
+
    var sq = result.match(/\>Stone Quarry \(Level (.+?)\)/);
    if(sq) setValue('Stone Quarry'+isle, sq[1]);
    else setValue('Stone Quarry'+isle, 0);
-   
+
    var lm = result.match(/\>Lumber Mill \(Level (.+?)\)/);
    if(lm) setValue('Lumber Mill'+isle, lm[1]);
    else setValue('Lumber Mill'+isle, 0);
-   
+
    var lab = result.match(/\>Laboratory \(Level (.+?)\)/);
    if(lab) setValue('Laboratory'+isle, lab[1]);
    else setValue('Laboratory'+isle, 0);
-   
+
    var ba = result.match(/\>Barracks \(Level (.+?)\)/);
    if(ba) setValue('Barracks'+isle, ba[1]);
    else setValue('Barracks'+isle, 0);
-   
+
    var ha = result.match(/\>Harbour \(Level (.+?)\)/);
    if(ha) setValue('Harbour'+isle, ha[1]);
    else setValue('Harbour'+isle, 0);
-   
+
    var st = result.match(/\>Storehouse \(Level (.+?)\)/);
    if(st) setValue('Storehouse'+isle, st[1]);
    else setValue('Storehouse'+isle, 0);
-   
+
    var sw = result.match(/\>Stone Wall \(Level (.+?)\)/);
    if(sw) setValue('Stone Wall'+isle, sw[1]);
    else setValue('Stone Wall'+isle, 0);
-   
+
    var wt = result.match(/\>Watch-Tower \(Level (.+?)\)/);
    if(wt) setValue('Watch-Tower'+isle, wt[1]);
    else setValue('Watch-Tower'+isle, 0);
-   
+
    //Army
    var sto = result.match(/\>Stone Throwers \((.+?)\)/);
    if(sto) setValue('Stone Throwers'+isle, sto[1]);
    else setValue('Stone Throwers'+isle, 0);
-   
+
    var spe = result.match(/\>Spearfighters \((.+?)\)/);
    if(spe) setValue('Spearfighters'+isle, spe[1]);
    else setValue('Spearfighters'+isle, 0);
-   
+
    var arch = result.match(/\>Archers \((.+?)\)/);
    if(arch) setValue('Archers'+isle, arch[1]);
    else setValue('Archers'+isle, 0);
-   
+
    var cat = result.match(/\>Catapults \((.+?)\)/);
    if(cat) setValue('Catapults'+isle, cat[1]);
    else setValue('Catapults'+isle, 0);
-   
+
    //Fleets
-   
+
    var lws = result.match(/\>Large Warships \((.+?)\)/);
    if(lws) setValue('Large Warships'+isle, lws[1]);
    else setValue('Large Warships'+isle, 0);
-   
+
    var lms = result.match(/\>Large Merchant Ships \((.+?)\)/);
    if(lms) setValue('Large Merchant Ships'+isle, lms[1]);
    else setValue('Large Merchant Ships'+isle, 0);
-   
+
    var sws = result.match(/\>Small Warships \((.+?)\)/);
    if(sws) setValue('Small Warships'+isle, sws[1]);
    else setValue('Small Warships'+isle, 0);
-   
+
    var sms = result.match(/\>Small Merchant Ships \((.+?)\)/);
    if(sms) setValue('Small Merchant Ships'+isle, sms[1]);
    else setValue('Small Merchant Ships'+isle, 0);
-   
+
    var colo = result.match(/\>Colonization Ships \((.+?)\)/);
    if(colo) setValue('Colonization Ships'+isle, colo[1]);
    else setValue('Colonization Ships'+isle, 0);
-   
+
    calculate_score(isle);
 }
 
 function addTableElements(){
-   
+
    var tables = document.getElementsByTagName('table');
    for ( var i = 0; i < tables.length; i++) {
       if (tables[i].className == 'table') { // list page, alliance pages, random island page
          var rows = tables[i].getElementsByTagName('tr');
          // on lab page a table can have 0 rows (probably research table after research is all done)
          if (rows.length > 0) {
-            numIslands = rows.length;
             var dataRows = rows[0].getElementsByTagName('td');
             var numcells = dataRows.length;  // 6 for resources, 4 for fleet, 3 for alliance pages
             // add a row with totals
 
             if (dataRows[0].innerHTML == '<b>Island</b>' && numcells > 1 && dataRows[numcells-1].width == '1%') { // list page only
+               setValue('numIslands', rows.length-1);
                // make table a bit wider
                dataRows[numcells-1].width = '1px';
                tables[i].style.width = '100%';
                var cells2sum;
-               
+
                addUpdateSection();
 
                if (numcells == 6) {         // resources
@@ -1403,7 +1402,7 @@ function addTableElements(){
                for (var r = totalsisles.length + 1; r < numcells; ++r) {
                   newtfootrow.insertCell(r); // visual appearance
                }
-               
+
                for(var r = 1; r < rows.length-1; ++r){
                   setValue('href'+(r-1), rows[r].getElementsByTagName('td')[0].getElementsByTagName('a')[0].href);
                   setValue('Name'+(r-1), rows[r].getElementsByTagName('td')[0].getElementsByTagName('a')[0].innerHTML);
@@ -1611,14 +1610,12 @@ function calculate_score(theIsland)
   }
 
   setValue('Score'+theIsland, Math.round(score));
-  
+
 }
 
 if (window.addEventListener){
    window.addEventListener("load", init, false) //invoke function
 }
-
-var numIslands = 0;
 
 var playername = '';
 var activeIsland; // name will be set on visit to the List page
@@ -1666,6 +1663,6 @@ imtitles['wood.gif'] = 'Lumber';
 
 var buildimgtitles = new Array();
 buildimgtitles['u_2.gif'] = 'Barracks';
-buildimgtitles['b_2.gif'] = 'Building'; 
+buildimgtitles['b_2.gif'] = 'Building';
 buildimgtitles['s_2.gif'] = 'Harbour';
 buildimgtitles['t_2.gif'] = 'Laboratory';
