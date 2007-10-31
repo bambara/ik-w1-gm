@@ -438,6 +438,7 @@ function parseTableCells(){
            }
            msg += "</select>";
            oElement.innerHTML = msg;
+           oElement.nextSibling.setAttribute("nowrap","true");
          }
       }
    }
