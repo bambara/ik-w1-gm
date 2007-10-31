@@ -417,7 +417,7 @@ function parseTableCells(){
                goldin = Math.round((stores - gold) * 3600 / goldprod);
                stonein = Math.round((stores - stone) * 3600 / stoneprod);
                woodin = Math.round((stores - wood) * 3600 / woodprod);
-               oElement.innerHTML = oElement.innerHTML.replace(/(\(Level \d+\))/, "$1 (Stores " + stores + ")") + "<hr>Gold reached in <span id='goldin'>" + DateHelper.getDuration(goldin) + "</span><br>Stone reached in <span id='stonein'>" + DateHelper.getDuration(stonein) + "</span><br>Wood reached in <span id='woodin'>" + DateHelper.getDuration(woodin) + "</span>";
+               oElement.innerHTML = oElement.innerHTML.replace(/(\(Level \d+\))/, "$1 (Stores " + stores + ")") + "<hr>Gold reached in <span id='goldin'>" + DateHelper.getDuration(goldin) + "</span><br>Stone reached in <span id='stonein'>" + DateHelper.getDuration(stonein) + "</span><br>Wood reached in <span id='woodin'>" + DateHelper.getDuration(woodin) + "</span><hr>";
                startStoreClock = true;
             }
          }
@@ -445,10 +445,26 @@ function parseTableCells(){
          var stonewait = (stones[(i-4)/2] - stone) * 3600 / stoneprod;
          var woodwait = (woods[(i-4)/2] - wood) * 3600 / woodprod;
          var longestwait = Math.round(Math.max(goldwait, stonewait, woodwait));
+         var toRed;
+         if(Math.round(goldwait) == longestwait) toRed = 'Gold';
+         else if(Math.round(stonewait) ==  longestwait) toRed ='Stone';
+         else if(Math.round(woodwait) == longestwait) toRed ='Lumber';
          var msg;
          if (minesunknown) { msg = "Ass. mines 20, upgrade"; } else { msg = "Upgrade"; }
          var needed = "<br>" + msg + " in <span id='upgr" + i + "'>" + DateHelper.getDuration(longestwait) + "</span>";
-         //" + DateHelper.getDuration(longestwait) + "
+         var lines = cells[i - 1].innerHTML.split("<br>"); //Put the lacking resource in red!
+         var newText = "";
+         for(var r=0; r<lines.length; r++){
+            var temp = lines[r].match(/Gold:.* Stone:.* Lumber:.*/);
+            if(temp && toRed){
+               myRegExp = new RegExp(toRed+": ([\\d]+)","i");
+               newText += '<br>'+lines[r].replace(myRegExp, toRed+": <span style='color:red;'>$1</span>");
+            }else{
+               if( r!=0 ) newText += '<br>';
+               newText += lines[r];
+            }
+         }
+         cells[i - 1].innerHTML = newText; //End of red
          cells[i - 1].innerHTML = cells[i - 1].innerHTML + needed;
          new newClock( timer, document.getElementById("upgr" + i), longestwait );
       }
@@ -1119,7 +1135,7 @@ function addUpdateSection(){
    var bold2 = document.createElement('b');
    bold2.setAttribute('id', 'updatedate');
    var sep2 = document.createTextNode(' | ');
-   var dat = document.createTextNode(GM_getValue('updatedate', new Date().toLocaleString()));
+   var dat = document.createTextNode(GM_getValue(playername+'updatedate', new Date().toLocaleString()));
    newdiv.appendChild(a);
    newdiv.appendChild(sep2);
    bold.appendChild(text);
@@ -1139,7 +1155,7 @@ function addUpdateSection(){
 }
 
 function updateIslandData(){
-   parseURL(GM_getValue('href'+0), 0);
+   parseURL(getValue('href'+0), 0);
 }
 
 var retryCount = 0;
@@ -1168,13 +1184,13 @@ function parseURL(theURL, isleNum){
                     
             }else{
                if(isleNum < numIslands - 2){
-                  document.getElementById('islandtext').innerHTML = "     Loading : "+GM_getValue('Name'+isleNum);
+                  document.getElementById('islandtext').innerHTML = "     Loading : "+getValue('Name'+isleNum);
                   parseURLResult(responseDetails.responseText, isleNum);
-                  if((isleNum+1) < numIslands - 2) parseURL(GM_getValue('href'+(isleNum+1)), (isleNum+1));
+                  if((isleNum+1) < numIslands - 2) parseURL(getValue('href'+(isleNum+1)), (isleNum+1));
                   else{
-                     GM_setValue('updatedate', new Date().toLocaleString());
+                     setValue('updatedate', new Date().toLocaleString());
                      document.getElementById('islandtext').innerHTML = "     Done!!!";
-                     document.getElementById('updatedate').innerHTML = GM_getValue('updatedate');
+                     document.getElementById('updatedate').innerHTML = getValue('updatedate');
                      location.reload(true);
                   }
                }else{
@@ -1196,83 +1212,83 @@ function parseURLResult(result, isle){
    
    //buildings
    var mh = result.match(/\>Main House \(Level (.+?)\)/);
-   if(mh) GM_setValue('Main House'+isle, mh[1]);
-   else GM_setValue('Main House'+isle, 0);
+   if(mh) setValue('Main House'+isle, mh[1]);
+   else setValue('Main House'+isle, 0);
    
    var gm = result.match(/\>Gold Mine \(Level (.+?)\)/);
-   if(gm) GM_setValue('Gold Mine'+isle, gm[1]);
-   else GM_setValue('Gold Mine'+isle, 0);
+   if(gm) setValue('Gold Mine'+isle, gm[1]);
+   else setValue('Gold Mine'+isle, 0);
    
    var sq = result.match(/\>Stone Quarry \(Level (.+?)\)/);
-   if(sq) GM_setValue('Stone Quarry'+isle, sq[1]);
-   else GM_setValue('Stone Quarry'+isle, 0);
+   if(sq) setValue('Stone Quarry'+isle, sq[1]);
+   else setValue('Stone Quarry'+isle, 0);
    
    var lm = result.match(/\>Lumber Mill \(Level (.+?)\)/);
-   if(lm) GM_setValue('Lumber Mill'+isle, lm[1]);
-   else GM_setValue('Lumber Mill'+isle, 0);
+   if(lm) setValue('Lumber Mill'+isle, lm[1]);
+   else setValue('Lumber Mill'+isle, 0);
    
    var lab = result.match(/\>Laboratory \(Level (.+?)\)/);
-   if(lab) GM_setValue('Laboratory'+isle, lab[1]);
-   else GM_setValue('Laboratory'+isle, 0);
+   if(lab) setValue('Laboratory'+isle, lab[1]);
+   else setValue('Laboratory'+isle, 0);
    
    var ba = result.match(/\>Barracks \(Level (.+?)\)/);
-   if(ba) GM_setValue('Barracks'+isle, ba[1]);
-   else GM_setValue('Barracks'+isle, 0);
+   if(ba) setValue('Barracks'+isle, ba[1]);
+   else setValue('Barracks'+isle, 0);
    
    var ha = result.match(/\>Harbour \(Level (.+?)\)/);
-   if(ha) GM_setValue('Harbour'+isle, ha[1]);
-   else GM_setValue('Harbour'+isle, 0);
+   if(ha) setValue('Harbour'+isle, ha[1]);
+   else setValue('Harbour'+isle, 0);
    
    var st = result.match(/\>Storehouse \(Level (.+?)\)/);
-   if(st) GM_setValue('Storehouse'+isle, st[1]);
-   else GM_setValue('Storehouse'+isle, 0);
+   if(st) setValue('Storehouse'+isle, st[1]);
+   else setValue('Storehouse'+isle, 0);
    
    var sw = result.match(/\>Stone Wall \(Level (.+?)\)/);
-   if(sw) GM_setValue('Stone Wall'+isle, sw[1]);
-   else GM_setValue('Stone Wall'+isle, 0);
+   if(sw) setValue('Stone Wall'+isle, sw[1]);
+   else setValue('Stone Wall'+isle, 0);
    
    var wt = result.match(/\>Watch-Tower \(Level (.+?)\)/);
-   if(wt) GM_setValue('Watch-Tower'+isle, wt[1]);
-   else GM_setValue('Watch-Tower'+isle, 0);
+   if(wt) setValue('Watch-Tower'+isle, wt[1]);
+   else setValue('Watch-Tower'+isle, 0);
    
    //Army
    var sto = result.match(/\>Stone Throwers \((.+?)\)/);
-   if(sto) GM_setValue('Stone Throwers'+isle, sto[1]);
-   else GM_setValue('Stone Throwers'+isle, 0);
+   if(sto) setValue('Stone Throwers'+isle, sto[1]);
+   else setValue('Stone Throwers'+isle, 0);
    
    var spe = result.match(/\>Spearfighters \((.+?)\)/);
-   if(spe) GM_setValue('Spearfighters'+isle, spe[1]);
-   else GM_setValue('Spearfighters'+isle, 0);
+   if(spe) setValue('Spearfighters'+isle, spe[1]);
+   else setValue('Spearfighters'+isle, 0);
    
    var arch = result.match(/\>Archers \((.+?)\)/);
-   if(arch) GM_setValue('Archers'+isle, arch[1]);
-   else GM_setValue('Archers'+isle, 0);
+   if(arch) setValue('Archers'+isle, arch[1]);
+   else setValue('Archers'+isle, 0);
    
    var cat = result.match(/\>Catapults \((.+?)\)/);
-   if(cat) GM_setValue('Catapults'+isle, cat[1]);
-   else GM_setValue('Catapults'+isle, 0);
+   if(cat) setValue('Catapults'+isle, cat[1]);
+   else setValue('Catapults'+isle, 0);
    
    //Fleets
    
    var lws = result.match(/\>Large Warships \((.+?)\)/);
-   if(lws) GM_setValue('Large Warships'+isle, lws[1]);
-   else GM_setValue('Large Warships'+isle, 0);
+   if(lws) setValue('Large Warships'+isle, lws[1]);
+   else setValue('Large Warships'+isle, 0);
    
    var lms = result.match(/\>Large Merchant Ships \((.+?)\)/);
-   if(lms) GM_setValue('Large Merchant Ships'+isle, lms[1]);
-   else GM_setValue('Large Merchant Ships'+isle, 0);
+   if(lms) setValue('Large Merchant Ships'+isle, lms[1]);
+   else setValue('Large Merchant Ships'+isle, 0);
    
    var sws = result.match(/\>Small Warships \((.+?)\)/);
-   if(sws) GM_setValue('Small Warships'+isle, sws[1]);
-   else GM_setValue('Small Warships'+isle, 0);
+   if(sws) setValue('Small Warships'+isle, sws[1]);
+   else setValue('Small Warships'+isle, 0);
    
    var sms = result.match(/\>Small Merchant Ships \((.+?)\)/);
-   if(sms) GM_setValue('Small Merchant Ships'+isle, sms[1]);
-   else GM_setValue('Small Merchant Ships'+isle, 0);
+   if(sms) setValue('Small Merchant Ships'+isle, sms[1]);
+   else setValue('Small Merchant Ships'+isle, 0);
    
    var colo = result.match(/\>Colonization Ships \((.+?)\)/);
-   if(colo) GM_setValue('Colonization Ships'+isle, colo[1]);
-   else GM_setValue('Colonization Ships'+isle, 0);
+   if(colo) setValue('Colonization Ships'+isle, colo[1]);
+   else setValue('Colonization Ships'+isle, 0);
    
    calculate_score(isle);
 }
@@ -1377,8 +1393,8 @@ function addTableElements(){
                }
                
                for(var r = 1; r < rows.length-1; ++r){
-                  GM_setValue('href'+(r-1), rows[r].getElementsByTagName('td')[0].getElementsByTagName('a')[0].href);
-                  GM_setValue('Name'+(r-1), rows[r].getElementsByTagName('td')[0].getElementsByTagName('a')[0].innerHTML);
+                  setValue('href'+(r-1), rows[r].getElementsByTagName('td')[0].getElementsByTagName('a')[0].href);
+                  setValue('Name'+(r-1), rows[r].getElementsByTagName('td')[0].getElementsByTagName('a')[0].innerHTML);
                }
             }
          }
@@ -1422,34 +1438,34 @@ function createExtendedTable(table, start){
 
    for (var r = 1; r < rows.length; ++r) {
       newCell = table.rows[r].insertCell(start);
-      newCell.innerHTML = GM_getValue('Stone Throwers'+(r-1), 0);
+      newCell.innerHTML = getValue('Stone Throwers'+(r-1));
 
       newCell = table.rows[r].insertCell(start+1);
-      newCell.innerHTML = GM_getValue('Spearfighters'+(r-1), 0);
+      newCell.innerHTML = getValue('Spearfighters'+(r-1));
 
       newCell = table.rows[r].insertCell(start+2);
-      newCell.innerHTML = GM_getValue('Archers'+(r-1), 0);
+      newCell.innerHTML = getValue('Archers'+(r-1));
 
       newCell = table.rows[r].insertCell(start+3);
-      newCell.innerHTML = GM_getValue('Catapults'+(r-1), 0);
+      newCell.innerHTML = getValue('Catapults'+(r-1));
 
       newCell = table.rows[r].insertCell(start+4);
-      newCell.innerHTML = GM_getValue('Large Warships'+(r-1), 0);
+      newCell.innerHTML = getValue('Large Warships'+(r-1));
 
       newCell = table.rows[r].insertCell(start+5);
-      newCell.innerHTML = GM_getValue('Large Merchant Ships'+(r-1), 0);
+      newCell.innerHTML = getValue('Large Merchant Ships'+(r-1));
 
       newCell = table.rows[r].insertCell(start+6);
-      newCell.innerHTML = GM_getValue('Small Warships'+(r-1), 0);
+      newCell.innerHTML = getValue('Small Warships'+(r-1));
 
       newCell = table.rows[r].insertCell(start+7);
-      newCell.innerHTML = GM_getValue('Small Merchant Ships'+(r-1), 0);
+      newCell.innerHTML = getValue('Small Merchant Ships'+(r-1));
 
       newCell = table.rows[r].insertCell(start+8);
-      newCell.innerHTML = GM_getValue('Colonization Ships'+(r-1), 0);
+      newCell.innerHTML = getValue('Colonization Ships'+(r-1));
 
       newCell = table.rows[r].insertCell(start+9);
-      newCell.innerHTML = GM_getValue('Score'+(r-1), 0);
+      newCell.innerHTML = getValue('Score'+(r-1));
    }
 }
 
@@ -1545,28 +1561,44 @@ function createExtendedTableSchedule(table, start){
    }
 }
 
+/*
+* Some wrapper functions
+*/
+
+function setValue(name, value) {
+    if (value == undefined || value == null) {
+        GM_setValue(playername+name, "");
+    } else {
+        GM_setValue(playername+name, value);
+    }
+}
+
+function getValue(unit) {
+    return GM_getValue(playername+unit, 0);
+}
+
 function calculate_score(theIsland)
 {
   var score = 0;
   var levels = [];
   var points = [0, 0.5, 1.1, 1.9, 2.8, 3.9, 5.2, 6.8, 8.7, 11, 13.8, 17.1, 21.1, 25.9, 31.6, 38.5, 46.8, 56.7, 68.6, 82.9, 100];
 
-  levels.push( parseInt(GM_getValue('Main House'+theIsland, 0)));
-  levels.push( parseInt(GM_getValue('Gold Mine'+theIsland, 0)));
-  levels.push( parseInt(GM_getValue('Stone Quarry'+theIsland, 0)));
-  levels.push( parseInt(GM_getValue('Lumber Mill'+theIsland, 0)));
-  levels.push( parseInt(GM_getValue('Laboratory'+theIsland, 0)));
-  levels.push( parseInt(GM_getValue('Barracks'+theIsland, 0)));
-  levels.push( parseInt(GM_getValue('Harbour'+theIsland, 0)));
-  levels.push( parseInt(GM_getValue('Storehouse'+theIsland, 0)));
-  levels.push( parseInt(GM_getValue('Stone Wall'+theIsland, 0)));
-  levels.push( parseInt(GM_getValue('Watch-Tower'+theIsland, 0)));
+  levels.push( parseInt(getValue('Main House'+theIsland)));
+  levels.push( parseInt(getValue('Gold Mine'+theIsland)));
+  levels.push( parseInt(getValue('Stone Quarry'+theIsland)));
+  levels.push( parseInt(getValue('Lumber Mill'+theIsland)));
+  levels.push( parseInt(getValue('Laboratory'+theIsland)));
+  levels.push( parseInt(getValue('Barracks'+theIsland)));
+  levels.push( parseInt(getValue('Harbour'+theIsland)));
+  levels.push( parseInt(getValue('Storehouse'+theIsland)));
+  levels.push( parseInt(getValue('Stone Wall'+theIsland)));
+  levels.push( parseInt(getValue('Watch-Tower'+theIsland)));
 
   for (var i = 0; i < levels.length; i++) {
     score += points[levels[i]];
   }
 
-  GM_setValue('Score'+theIsland, Math.round(score));
+  setValue('Score'+theIsland, Math.round(score));
   
 }
 
@@ -1620,3 +1652,8 @@ imtitles['gold.gif'] = 'Gold';
 imtitles['stones.gif'] = 'Stone';
 imtitles['wood.gif'] = 'Lumber';
 
+var buildimgtitles = new Array();
+buildimgtitles['u_2.gif'] = 'Barracks';
+buildimgtitles['b_2.gif'] = 'Building'; 
+buildimgtitles['s_2.gif'] = 'Harbour';
+buildimgtitles['t_2.gif'] = 'Laboratory';
