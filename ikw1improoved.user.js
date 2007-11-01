@@ -850,16 +850,26 @@ function parseIn(){
                if (fl == 's1') { totalarmy += 5 * fleet[fl]; }
                if (fl == 's3') { totalarmy += 2 * fleet[fl]; }
             }
-            if (units['u3']) { // archers
-               oElement.form["form[u3]"].value = Math.min(totalarmy, units['u3']);
+            var archerForm;
+            var spearForm;
+            var stonersForm;
+            for(var i=0; i<oElement.form.length; i++){
+               if(oElement.form[i]){
+                  if(oElement.form[i].name == 'form[u3]') archerForm = i;
+                  if(oElement.form[i].name == 'form[u2]') spearForm = i;
+                  if(oElement.form[i].name == 'form[u1]') stonersForm = i;
+               }
+            }
+            if (units['u3'] && archerForm) { // archers
+               oElement.form[archerForm].value = Math.min(totalarmy, units['u3']);
                totalarmy -= Math.min(totalarmy, units['u3']);
             }
-            if (units['u2']) { // spearfighters
-               oElement.form["form[u2]"].value = Math.min(totalarmy, units['u2']);
+            if (units['u2'] && spearForm) { // spearfighters
+               oElement.form[spearForm].value = Math.min(totalarmy, units['u2']);
                totalarmy -= Math.min(totalarmy, units['u2']);
             }
-            if (units['u1']) { // stone throwers
-               oElement.form["form[u1]"].value = Math.min(totalarmy, units['u1']);
+            if (units['u1'] && stonersForm) { // stone throwers
+               oElement.form[stonersForm].value = Math.min(totalarmy, units['u1']);
                totalarmy -= Math.min(totalarmy, units['u1']);
             }
             updateUnitsResources(oElement.form);
@@ -867,7 +877,7 @@ function parseIn(){
          else if (oElement.value == 'Spy') {
             oElement.setAttribute('onclick', "if ((this.form[\"form[s1]\"]?this.form[\"form[s1]\"].value:0) + (this.form[\"form[s3]\"]?this.form[\"form[s3]\"].value:0) == 0) {"+
                   "if (this.form[\"form[s3]\"]) { this.form[\"form[s3]\"].value = 1; }"+
-                  "else if (this.form[\"form[s1]\"]) { this.form[\"form[s1]\"].value = 1;");
+                  "else if (this.form[\"form[s1]\"]) { this.form[\"form[s1]\"].value = 1;}}");
          }
       }
 
@@ -876,12 +886,13 @@ function parseIn(){
          if (a) {
             if (hiddenrower == -1) {
                for (var c = 0; c < cells.length; ++c) {
-                  if (cells[c].innerHTML == 'Loading') {
+                  if (cells[c].innerHTML == '<b>Loading</b>') {
                      hiddenrower = c-3;
                      break;
                   }
                }
             }
+            if(hiddenrower == -1) hiddenrower = 5; //this if for spy ship
             var newrow = tables[tables.length-1].insertRow(hiddenrower++);
             newrow.insertCell(0).innerHTML = fullnames[a[1]];
             newrow.insertCell(1).innerHTML = oElement.value;
@@ -1173,6 +1184,8 @@ function updateIslandData(){
 
 var retryCount = 0;
 
+var maxRetry = 3;
+
 function parseURL(theURL, isleNum){
    GM_xmlhttpRequest({
         method: 'GET',
@@ -1303,6 +1316,30 @@ function parseURLResult(result, isle){
    else setValue('Colonization Ships'+isle, 0);
 
    calculate_score(isle);
+}
+
+function parseMainHouse(){
+   var mhLink = document.location.toString();
+   mhLink = mhLink.replace(gup('p'), 'b1')
+   alert(mhLink);
+}
+
+function parseLaboratory(){
+   var LabLink = document.location.toString();
+   LabLink = LabLink.replace(gup('p'), 'b5')
+   alert(LabLink);
+}
+
+function parseBarracks(){
+   var BarLink = document.location.toString();
+   BarLink = BarLink.replace(gup('p'), 'b6')
+   alert(BarLink);
+}
+
+function parseHarbour(){
+   var HarLink = document.location.toString();
+   HarLink = HarLink.replace(gup('p'), 'b7')
+   alert(HarLink);
 }
 
 function addTableElements(){
