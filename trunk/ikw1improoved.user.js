@@ -1051,7 +1051,6 @@ function parseBolds(){
 
 function parseMap(){
    // append info to map page
-   //var areas = document.getElementById('map');
    if (gup('p') == 'map' && gup('sub') == '') {
       var areas = document.getElementsByTagName('area');
 
@@ -1089,21 +1088,105 @@ function parseMap(){
 
       var newDiv = document.createElement('div');
       newDiv.id = 'mapinfo';
+      newDiv.className = 'mapinfo';
 
-      var msg = '<h3>' + validislands + ' islands</h3>';
-      msg += '<table><tr><td><b>Alliance</b></td><td><b>Members</b></td><td><b># Islands</b></td></tr>';
+      var checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.id = 'showIslandsScore';
+      checkbox.defaultChecked = false;
+      checkbox.addEventListener("click", showIslandsScore, true);
+      
+      var bold = document.createElement('b');
+      var text = document.createTextNode('See Islands Score : ');
+      bold.appendChild(text);
+      
+      var h3 = document.createElement('h3');
+      var text2 = document.createTextNode(validislands + ' islands');
+      h3.appendChild(text2);
+      
+      var newTable = document.createElement('table');
+      var newRow1 = document.createElement('tr');
+      var newCell1 = document.createElement('td');
+      newCell1.innerHTML = '<b>Alliance</b>';
+      var newCell2 = document.createElement('td');
+      newCell2.innerHTML = '<b>Members</b>';
+      var newCell3 = document.createElement('td');
+      newCell3.innerHTML = '<b># Islands</b>';
+      
+      newRow1.appendChild(newCell1);
+      newRow1.appendChild(newCell2);
+      newRow1.appendChild(newCell3);
+      
+      newTable.appendChild(newRow1);
 
       for (var alliance in alliances) {
          if (typeof alliances[alliance] != 'function') { // om de prototypes niet te hebben, christus!
-            msg += '<tr><td>' + alliance + '</td><td>' + alliances[alliance].unique().join(' ; ') + '</td><td>' + alliances[alliance].length + '</td></tr>';
+            var newRow = document.createElement('tr');
+            var newCe1 = document.createElement('td');
+            var newCe2 = document.createElement('td');
+            var newCe3 = document.createElement('td');
+            newCe1.innerHTML = alliance;
+            newCe2.innerHTML = alliances[alliance].unique().join(' ; ');
+            newCe3.innerHTML = alliances[alliance].length;
+            
+            newRow.appendChild(newCe1);
+            newRow.appendChild(newCe2);
+            newRow.appendChild(newCe3);
+            
+            newTable.appendChild(newRow);
          }
       }
+      
+      var br = document.createElement('br');
+      var b = document.createElement('b');
+      var text3 = document.createTextNode('Unruled islands:');
+      var text4 = document.createTextNode(unruled.join(', '));
+      b.appendChild(text3);
 
-      msg += '</table>';
-      msg += '<br><b>Unruled islands:</b> ' + unruled.join(', ');
+      newDiv.appendChild(checkbox);
+      newDiv.appendChild(bold);
+      newDiv.appendChild(h3);
+      newDiv.appendChild(newTable);
+      newDiv.appendChild(br);
+      newDiv.appendChild(b);
+      newDiv.appendChild(text4);
+      
+      addGlobalStyle('.mapinfo { float:right;}');
+      document.body.insertBefore(newDiv, document.getElementsByTagName('br')[1]);
+   }
+}
 
-      newDiv.innerHTML = msg;
-      document.body.appendChild(newDiv);
+function showIslandsScore(){
+   if(document.getElementById('showIslandsScore').checked){
+      var c; var d; 
+      var im = document.images[4]; 
+      var ot = im.offsetTop; 
+      var ol = im.offsetLeft; 
+      b = document.getElementsByTagName('area');
+      for(i=1;i<b.length;i++) { 
+         if (b[i].coords.length>0 && b[i].title.length>0) {
+            var t = b[i].coords.split(','); 
+            var s = b[i].title.split('Score: '); 
+            var nl = (ol*1)+(t[0]*1); 
+            var nt = (ot*1)+(t[1]*1);
+            var lol = document.createElement('div');
+            lol.setAttribute('id', 'ScoreOfIsland');
+            lol.setAttribute('style', "font-family: Silkscreen; font-size:8px;"+
+               "height:8px; line-height:8px; "+
+               "position:absolute;left:"+nl+
+               "px;top:"+nt+"px; "+
+               "background-color: #FFF");
+            lol.innerHTML = s[1]+'<br/>';
+            document.body.appendChild(lol);
+            lol = lol + '<div style=\'font-family: Verdana; font-size:8px; height:8px; line-height:8px; position:absolute;left:'+nl+'px;top:'+nt+'px; background-color: #FFF\'>'+s[1]+'<br/></div>'; 
+            var nl=0; 
+            var nt=0;
+         }
+      }
+   }else{
+      while(document.getElementById('ScoreOfIsland')){
+         document.body.removeChild(document.getElementById('ScoreOfIsland'));
+      }
    }
 }
 // http://www.netlobo.com/url_query_string_javascript.html
@@ -1414,9 +1497,14 @@ function addTableElements(){
                }
 
                var totalsisles = new Array();
+               var averageisles = new Array();
 
                for (var k = 0; k < cells2sum.length; ++k) { // boring init
                   totalsisles[k] = 0;
+               }
+               
+               for (var k = 0; k < cells2sum.length; ++k) { // boring init
+                  averageisles[k] = 0;
                }
 
                for (var r = 1; r < rows.length; ++r) {
@@ -1425,10 +1513,24 @@ function addTableElements(){
                      totalsisles[k] += parseInt(childs[cells2sum[k]].innerHTML);
                   }
                }
+               
+               for (var r = 1; r < rows.length; ++r) {
+                  for (var k = 0; k < cells2sum.length; ++k) {
+                     averageisles[k] = Math.round(totalsisles[k]/getValue('numIslands'));
+                  }
+               }
 
+               var newtfoot2 = tables[i].createTFoot(); //Create new tfoot
+               var newtfootrow2 = newtfoot2.insertRow(0); //Define a new row for the tfoot
+               newtfootrow2.insertCell(0).innerHTML = "<b>Average/Island :</b>"; //Define a new cell for the tfoot's row
+
+               for (var r = 0; r < totalsisles.length; ++r) {
+                  newtfootrow2.insertCell(r+1).innerHTML = averageisles[r];
+               }
+               
                var newtfoot = tables[i].createTFoot(); //Create new tfoot
                var newtfootrow = newtfoot.insertRow(0); //Define a new row for the tfoot
-               newtfootrow.insertCell(0).innerHTML = "Totals"; //Define a new cell for the tfoot's row
+               newtfootrow.insertCell(0).innerHTML = "<b>Totals :</b>"; //Define a new cell for the tfoot's row
 
                for (var r = 0; r < totalsisles.length; ++r) {
                   newtfootrow.insertCell(r+1).innerHTML = totalsisles[r];
@@ -1436,13 +1538,15 @@ function addTableElements(){
 
                if(numcells == 6){      //for visual appearance
                   newtfootrow.insertCell(4).innerHTML = '';
+                  newtfootrow2.insertCell(4).innerHTML = '';
                }
 
                for (var r = totalsisles.length + 1; r < numcells; ++r) {
                   newtfootrow.insertCell(r); // visual appearance
+                  newtfootrow2.insertCell(r); // visual appearance
                }
 
-               for(var r = 1; r < rows.length-1; ++r){
+               for(var r = 1; r < rows.length-2; ++r){
                   setValue('href'+(r-1), rows[r].getElementsByTagName('td')[0].getElementsByTagName('a')[0].href);
                   setValue('Name'+(r-1), rows[r].getElementsByTagName('td')[0].getElementsByTagName('a')[0].innerHTML);
                }
