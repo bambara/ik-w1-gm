@@ -68,14 +68,14 @@ Timer.prototype.setTimeOut = function() {
    setWindowTimeout( this, this.setTimeOut, this.interval );
 };
 
-function Observable() {
-   this.observers = [];
-}
-
 function setWindowTimeout( object, func, seconds ) {
    return window.setTimeout(
       function() { func.apply( object ); }, seconds
       );
+}
+
+function Observable() {
+   this.observers = [];
 }
 
 Observable.prototype.addObserver = function( observer ) {
@@ -103,8 +103,6 @@ newClock.prototype.update = function() {
       this.element.innerHTML = "Finished";
    }
 }
-
-//HTMLDivElement.prototype.Clock = newClock;
 
 var timer = new Timer( 1000 );
 
@@ -159,6 +157,19 @@ DateHelper.getDateTime = function (time) {
 };
 
 function init(){
+   
+   // add a menu for easier browsing
+   var msg = "<a href='http://213.203.194.123/us/1/index.php?s=" + gup('s') + "&p=b1'>Main House</a>";
+   msg += "&nbsp;-&nbsp;<a href='http://213.203.194.123/us/1/index.php?s=" + gup('s') + "&p=b5'>Laboratory</a>";
+   msg += "&nbsp;-&nbsp;<a href='http://213.203.194.123/us/1/index.php?s=" + gup('s') + "&p=b6'>Barracks</a>";
+   msg += "&nbsp;-&nbsp;<a href='http://213.203.194.123/us/1/index.php?s=" + gup('s') + "&p=b7'>Harbour</a>";
+   if(gup('p') != 'isles') msg += "&nbsp;-&nbsp;<a href='http://213.203.194.123/us/1/index.php?s=" + gup('s') + "&p=isles'>Islands</a>";
+   var theDIV = document.createElement('div');
+   theDIV.style.padding = '10px';
+   theDIV.style.paddingBottom = '0px';
+
+   theDIV.innerHTML = msg;
+   pseudoInsertAfter(theDIV, document.getElementsByTagName('table')[0]);
 
    var scripts = document.getElementsByTagName('script');
    for( var i = 0, oElement; oElement = scripts[i]; ++i ) {
@@ -167,6 +178,7 @@ function init(){
       var a = oElement.innerHTML.match(/new Clock\(\s*\w+,\s*e\(\s*'(\S+)'\s*\),\s*(\d+)\s*\);/i);
       if (a) {
          clocks[a[1]] = parseInt(a[2]);
+         new newClock(timer, document.getElementById(a[1]), a[2]);
       }
    }
 
@@ -209,19 +221,6 @@ function init(){
    if (startOrderClock) {
       new newClock(timer, document.getElementById("ordersdonein"), orderTotalTime);
    }
-
-   // add a menu for easier browsing
-   var msg = "<a href='http://213.203.194.123/us/1/index.php?s=" + gup('s') + "&p=b1'>Main House</a>";
-   msg += "&nbsp;-&nbsp;<a href='http://213.203.194.123/us/1/index.php?s=" + gup('s') + "&p=b5'>Laboratory</a>";
-   msg += "&nbsp;-&nbsp;<a href='http://213.203.194.123/us/1/index.php?s=" + gup('s') + "&p=b6'>Barracks</a>";
-   msg += "&nbsp;-&nbsp;<a href='http://213.203.194.123/us/1/index.php?s=" + gup('s') + "&p=b7'>Harbour</a>";
-   if(gup('p') != 'isles') msg += "&nbsp;-&nbsp;<a href='http://213.203.194.123/us/1/index.php?s=" + gup('s') + "&p=isles'>Islands</a>";
-   var theDIV = document.createElement('div');
-   theDIV.style.padding = '10px';
-   theDIV.style.paddingBottom = '0px';
-
-   theDIV.innerHTML = msg;
-   pseudoInsertAfter(theDIV, tables[0]);
 
    // clean-up
    cells = null;
@@ -293,8 +292,10 @@ function parseTables(){
                // - add mail-button per segment
                var allmembers = new Array();
                for (var r = 2; r < rows.length; ++r) { // 2 to skip 'Members' and 'Player' rows
-                  var a = rows[r].getElementsByTagName('td')[0].innerHTML.match(/.*\>(.+?)</);
-                  allmembers.push(a[1]);
+                  var a = rows[r].getElementsByTagName('td')[0].getElementsByTagName('a')[0].innerHTML;
+                  if(a){
+                     allmembers.push(a);
+                  }
                }
 
                var newDiv = document.createElement('div');
@@ -1151,7 +1152,7 @@ function parseMap(){
       newDiv.appendChild(b);
       newDiv.appendChild(text4);
       
-      addGlobalStyle('.mapinfo { float:right;}');
+      addGlobalStyle('.mapinfo { float:right;width:35%;}');
       document.body.insertBefore(newDiv, document.getElementsByTagName('br')[1]);
    }
 }
