@@ -256,7 +256,7 @@ function parseTables(){
             if (dataRows[0].innerHTML == '<b>New order</b>') { // harbour page, orders
                // preparation to show how much units and resources you can ship
                var newrow = tables[i].insertRow(rows.length - 1);
-               tables[i].style.width = '40%';
+               tables[i].style.width = '45%';
                newrow.insertCell(0).innerHTML = "Units: <span id='orders_units'>0</span> Resources: <span id='orders_res'>0</span>";
                newrow.insertCell(1); // visuals
             }
@@ -313,6 +313,10 @@ function parseTables(){
                      document.getElementById('events').elements[r-1].checked = true;
                   }
                }
+            }
+            else if (dataRows[0].innerHTML == '<b>Your fleets</b>') { // harbour page, orders
+               // preparation to show how much units and resources you can ship
+               tables[i].style.width = '45%';
             }
          }
       }
@@ -784,24 +788,25 @@ function parseDivs(){
          
          var mh = document.createElement('a');
          mh.setAttribute('href', "/us/1/index.php?s=" + gup('s') + "&p=b1");
-         mh.innerHTML = 'Main House  ';
+         mh.innerHTML = 'Main House'+'&nbsp;&nbsp;';
          
          var lab = document.createElement('a');
          lab.setAttribute('href', "/us/1/index.php?s=" + gup('s') + "&p=b5");
-         lab.innerHTML = 'Laboratory  ';
+         lab.innerHTML = 'Laboratory'+'&nbsp;&nbsp;';
          
          var bar = document.createElement('a');
          bar.setAttribute('href', "/us/1/index.php?s=" + gup('s') + "&p=b6");
-         bar.innerHTML = 'Barracks  ';
+         bar.innerHTML = 'Barracks'+'&nbsp;&nbsp;';
          
          var har = document.createElement('a');
          har.setAttribute('href', "/us/1/index.php?s=" + gup('s') + "&p=b7");
-         har.innerHTML = 'Harbour  ';
+         har.innerHTML = 'Harbour'+'&nbsp;&nbsp;';
 
          oElement.insertBefore(har, a[1]);
          oElement.insertBefore(bar, a[1]);
          oElement.insertBefore(lab, a[1]);
          oElement.insertBefore(mh, a[1]);
+         oElement.insertBefore(document.createElement('br'), a[1]);
       }
 
       // barracks & harbour & laboratory
@@ -925,7 +930,15 @@ function parseBolds(){
          var msg = '<table class="table"><caption>Building costs</caption><tr><td><b>Level</b></td><td><b>Gold</b></td><td><b>Stone</b></td><td><b>Lumber</b></td><td><b>' + buildingaction + '</b></tr>';
 
          for (var cl = currlevel + 1; cl <= 20; ++cl) {
-            msg += '<tr><td>' + cl + '</td><td>' + Math.floor(buildinfo[thisbuilding][2] * Math.pow(1.2, cl)) + '</td><td>' + Math.floor(buildinfo[thisbuilding][3] * Math.pow(1.2, cl)) + '</td><td>' + Math.floor(buildinfo[thisbuilding][4] * Math.pow(1.2, cl)) + '</td><td>' + Math.floor(buildinfo[thisbuilding][0] * Math.pow(buildinfo[thisbuilding][1], cl)) + '</td></tr>';
+            msg += "<tr><td>" + cl + "</td>"+
+                   "<td>" + Math.floor(buildinfo[thisbuilding][2] * Math.pow(1.2, cl)) + "</td>"+
+                   "<td>" + Math.floor(buildinfo[thisbuilding][3] * Math.pow(1.2, cl)) + "</td>"+
+                   "<td>" + Math.floor(buildinfo[thisbuilding][4] * Math.pow(1.2, cl)) + "</td>";
+            if(thisbuilding != 'watch-tower'){
+               msg +="<td>" + Math.floor(buildinfo[thisbuilding][0] * Math.pow(buildinfo[thisbuilding][1], cl)) + "</td></tr>";
+            }else{
+               msg +="<td>" + Math.round((buildinfo[thisbuilding][0] * Math.pow(buildinfo[thisbuilding][1], cl))*10)/10 + "</td></tr>";
+            }
          }
 
          msg += '</table>';
@@ -1120,8 +1133,14 @@ function getPlayerName(){
 }
 
 function addUpdateSection(){
-   var newdiv = document.createElement('div');
-   newdiv.className = 'update';
+   var divs = document.getElementsByTagName('div');
+   var newdiv;
+   for(var i=0; i<divs.length; i++){
+      if(divs[i].className == 'navigation'){
+         newdiv = divs[i];
+         break;
+      }
+   }
    
    var a = document.createElement('button');
    a.innerHTML = 'Update';
@@ -1145,39 +1164,134 @@ function addUpdateSection(){
    
    var sep3 = document.createTextNode(' | ');
    
+   var sep4 = document.createTextNode(' | ');
+   
+   var sep5 = document.createTextNode(' | ');
+   
    var HarbourCheckbox = document.createElement('input');
    HarbourCheckbox.type = 'checkbox';
    HarbourCheckbox.id = 'getHarbourData';
-   HarbourCheckbox.defaultChecked = false;
+   HarbourCheckbox.defaultChecked = getValue('getHarbourData');
+   HarbourCheckbox.addEventListener("click", 
+                                    function(){ 
+                                       if(document.getElementById('getHarbourData').checked){
+                                          setValue('getHarbourData', true);
+                                       }else{
+                                          setValue('getHarbourData', false);
+                                       }
+                                    }, true);
    
    var HarbourLabel = document.createElement('label');
    HarbourLabel.htmlFor = 'getHarbourData';
    
-   var HarbourText = document.createTextNode("Harbour : ");
+   var HarbourText = document.createTextNode("Harbour");
    
    var bold3 = document.createElement('b');
    
    bold3.appendChild(HarbourText);
    HarbourLabel.appendChild(bold3);
+   
+   var MHCheckbox = document.createElement('input');
+   MHCheckbox.type = 'checkbox';
+   MHCheckbox.id = 'getMHData';
+   MHCheckbox.defaultChecked = getValue('getMHData');
+   MHCheckbox.addEventListener("click", 
+                               function(){ 
+                                  if(document.getElementById('getMHData').checked){
+                                     setValue('getMHData', true);
+                                  }else{
+                                     setValue('getMHData', false);
+                                  }
+                               }, true);
+   
+   var MHLabel = document.createElement('label');
+   MHLabel.htmlFor = 'getMHData';
+   
+   var MHText = document.createTextNode("Main House");
+   
+   var bold4 = document.createElement('b');
+   
+   bold4.appendChild(MHText);
+   MHLabel.appendChild(bold4);
+   
+   var BarCheckbox = document.createElement('input');
+   BarCheckbox.type = 'checkbox';
+   BarCheckbox.id = 'getBarData';
+   BarCheckbox.defaultChecked = getValue('getBarData');
+   BarCheckbox.addEventListener("click", 
+                                function(){
+                                   if(document.getElementById('getBarData').checked){
+                                      setValue('getBarData', true);
+                                   }else{
+                                      setValue('getBarData', false);
+                                   }
+                                }, true);
+   
+   var BarLabel = document.createElement('label');
+   BarLabel.htmlFor = 'getBarData';
+   
+   var BarText = document.createTextNode("Barracks");
+   
+   var bold4 = document.createElement('b');
+   
+   bold4.appendChild(BarText);
+   BarLabel.appendChild(bold4);
+   
+   var LabCheckbox = document.createElement('input');
+   LabCheckbox.type = 'checkbox';
+   LabCheckbox.id = 'getLabData';
+   LabCheckbox.defaultChecked = getValue('getLabData');
+   LabCheckbox.addEventListener("click", 
+                                function(){ 
+                                   if(document.getElementById('getLabData').checked){
+                                      setValue('getLabData', true);
+                                   }else{
+                                      setValue('getLabData', false);
+                                   }
+                                }, true);
+   
+   var LabLabel = document.createElement('label');
+   LabLabel.htmlFor = 'getLabData';
+   
+   var LabText = document.createTextNode("Laboratory");
+   
+   var bold5 = document.createElement('b');
+   
+   bold5.appendChild(LabText);
+   LabLabel.appendChild(bold5);
+   
+   // Add the components to the newDiv
+   newdiv.appendChild(document.createElement('br'));
+   newdiv.appendChild(document.createElement('hr'));
    newdiv.appendChild(a);
+   
    newdiv.appendChild(sep2);
    bold.appendChild(text);
    newdiv.appendChild(bold);
+   
+   newdiv.appendChild(document.createElement('br'));
+   newdiv.appendChild(document.createElement('hr'));
+   newdiv.appendChild(MHCheckbox);
+   newdiv.appendChild(MHLabel);
+   
+   newdiv.appendChild(sep3);
+   newdiv.appendChild(LabCheckbox);
+   newdiv.appendChild(LabLabel);
+   
+   newdiv.appendChild(sep4);
+   newdiv.appendChild(HarbourCheckbox);
+   newdiv.appendChild(HarbourLabel);
+   
+   newdiv.appendChild(sep5);
+   newdiv.appendChild(BarCheckbox);
+   newdiv.appendChild(BarLabel);
+   
    newdiv.appendChild(sep);
    bold2.appendChild(text2);
    newdiv.appendChild(bold2);
    newdiv.appendChild(dat);
-   newdiv.appendChild(sep3);
-   newdiv.appendChild(HarbourLabel);
-      newdiv.appendChild(HarbourCheckbox);
-   newdiv.align = 'left';
-   addGlobalStyle('.navigation { width:100%;}');
-   addGlobalStyle('.table { padding-top: 10px; }');
-   addGlobalStyle(".update { padding-left: 20px; "+
-                  "background-color:#F0F0F0; margin:1px; padding:3px;"+
-                  "text-align:center; width:100%;}");
-
-   document.getElementsByTagName('body')[0].insertBefore(newdiv, document.getElementsByTagName('br')[1]);
+   
+   newdiv.style.width = '100%';
 }
 
 function updateIslandData(){
@@ -1228,7 +1342,7 @@ function parseURL(iteration, sudIteration, isleNum){
                }else{
                   switch (iteration) {
                   case 0:
-                     document.getElementById('islandtext').innerHTML = "     Loading : "+getValue('Name'+isleNum);
+                     document.getElementById('islandtext').innerHTML = "Loading : "+getValue('Name'+isleNum);
                      parseURLResult(responseDetails.responseText, isleNum);
                      if(document.getElementById('getHarbourData').checked){
                         parseURL( 1, -1, isleNum); //Parse Harbour page!
@@ -1238,6 +1352,7 @@ function parseURL(iteration, sudIteration, isleNum){
                      break;
                   case 1:
                      if(sudIteration == -1){
+                        document.getElementById('islandtext').innerHTML += " -> Harbour";
                         var s = responseDetails.responseText;
                         var Rx= /&p=b7&sub=show&id\=([0-9]*)/g;
                         var pat;
@@ -1265,14 +1380,14 @@ function parseURL(iteration, sudIteration, isleNum){
                }
             },
             onerror: function(responseDetails) {
-               document.getElementById('islandtext').innerHTML = "     Done!!!";
+               document.getElementById('islandtext').innerHTML = "Done!!!";
                var debugMessage = "error in sub onerror " + responseDetails.status + " island " + isleNum + "<br>";
                GM_log(debugMessage);
             }
       }); //end xmlrequest
    }else{
       setValue('updatedate', new Date().toLocaleString());
-      document.getElementById('islandtext').innerHTML = "     Done!!!";
+      document.getElementById('islandtext').innerHTML = "Done!!!";
       document.getElementById('updatedate').innerHTML = getValue('updatedate');
       location.reload(true);
    }
@@ -1495,7 +1610,7 @@ function addTableElements(){
                for (var r = 1; r < rows.length; ++r) {
                   for (var k = 0; k < cells2sum.length; ++k) {
                      var childs = rows[r].getElementsByTagName('td');
-                     totalsisles[k] += parseInt(childs[cells2sum[k]].innerHTML);
+                     totalsisles[k] += parseInt(childs[cells2sum[k]].textContent);
                   }
                }
                
@@ -1524,6 +1639,27 @@ function addTableElements(){
                if(numcells == 6){      //for visual appearance
                   newtfootrow.insertCell(4).innerHTML = '';
                   newtfootrow2.insertCell(4).innerHTML = '';
+                  for(var r = 1; r < rows.length-2; ++r){
+                     var buildings = rows[r].getElementsByTagName('td')[4].getElementsByTagName('img');
+                     for(var i=0; i<buildings.length; i++){
+                        if(buildings[i].src.match(/u_2\.gif/)){
+                           setValue('BarBuild'+(r-1), true);
+                           buildings[i].title = getValue('BarOrders'+(r-1));
+                        }
+                        if(buildings[i].src.match(/s_2\.gif/)){
+                           setValue('HarBuild'+(r-1), true);
+                           buildings[i].title = getValue('HarOrders'+(r-1));
+                        }
+                        if(buildings[i].src.match(/b_2\.gif/)){
+                           setValue('MHBuild'+(r-1), true);
+                           buildings[i].title = getValue('MHOrders'+(r-1));
+                        }
+                        if(buildings[i].src.match(/t_2\.gif/)){
+                           setValue('LabBuild'+(r-1), true);
+                           buildings[i].title = getValue('LabOrders'+(r-1));
+                        }
+                     }
+                  }
                }
 
                for (var r = totalsisles.length + 1; r < numcells; ++r) {
@@ -1643,59 +1779,59 @@ function createExtendedTableSchedule(table, start){
       var schedules = table.rows[r].getElementsByTagName('td')[1].innerHTML;
 
       if(schedules.length == 0){
-         table.rows[r].getElementsByTagName('td')[1].innerHTML = 0;
+         table.rows[r].getElementsByTagName('td')[1].innerHTML = '0/'+getValue('Stone Throwers'+(r-1));
 
          newCell = table.rows[r].insertCell(start);
-         newCell.innerHTML = 0;
+         newCell.innerHTML = '0/'+getValue('Spearfighters'+(r-1));
 
          newCell = table.rows[r].insertCell(start+1);
-         newCell.innerHTML = 0;
+         newCell.innerHTML = '0/'+getValue('Archers'+(r-1));
 
          newCell = table.rows[r].insertCell(start+2);
-         newCell.innerHTML = 0;
+         newCell.innerHTML = '0/'+getValue('Catapults'+(r-1));
 
          newCell = table.rows[r].insertCell(start+3);
-         newCell.innerHTML = 0;
+         newCell.innerHTML = '0/'+getValue('Large Warships'+(r-1));
 
          newCell = table.rows[r].insertCell(start+4);
-         newCell.innerHTML = 0;
+         newCell.innerHTML = '0/'+getValue('Large Merchant Ships'+(r-1));
 
          newCell = table.rows[r].insertCell(start+5);
-         newCell.innerHTML = 0;
+         newCell.innerHTML = '0/'+getValue('Small Warships'+(r-1));
 
          newCell = table.rows[r].insertCell(start+6);
-         newCell.innerHTML = 0;
+         newCell.innerHTML = '0/'+getValue('Small Merchant Ships'+(r-1));
 
          newCell = table.rows[r].insertCell(start+7);
-         newCell.innerHTML = 0;
+         newCell.innerHTML = '0/'+getValue('Colonization Ships'+(r-1));
       }else{
          var schedules_array = schedules.split(",");
 
-         table.rows[r].getElementsByTagName('td')[1].innerHTML = schedules_array[0];
+         table.rows[r].getElementsByTagName('td')[1].innerHTML = '<b>'+schedules_array[0]+'</b>/'+getValue('Stone Throwers'+(r-1));
 
          newCell = table.rows[r].insertCell(start);
-         newCell.innerHTML = schedules_array[1];
+         newCell.innerHTML = '<b>'+schedules_array[1]+'</b>/'+getValue('Spearfighters'+(r-1));
 
          newCell = table.rows[r].insertCell(start+1);
-         newCell.innerHTML = schedules_array[2];
+         newCell.innerHTML = '<b>'+schedules_array[2]+'</b>/'+getValue('Archers'+(r-1));
 
          newCell = table.rows[r].insertCell(start+2);
-         newCell.innerHTML = schedules_array[3];
+         newCell.innerHTML = '<b>'+schedules_array[3]+'</b>/'+getValue('Catapults'+(r-1));
 
          newCell = table.rows[r].insertCell(start+3);
-         newCell.innerHTML = schedules_array[4];
+         newCell.innerHTML = '<b>'+schedules_array[4]+'</b>/'+getValue('Large Warships'+(r-1));
 
          newCell = table.rows[r].insertCell(start+4);
-         newCell.innerHTML = schedules_array[5];
+         newCell.innerHTML = '<b>'+schedules_array[5]+'</b>/'+getValue('Large Merchant Ships'+(r-1));
 
          newCell = table.rows[r].insertCell(start+5);
-         newCell.innerHTML = schedules_array[6];
+         newCell.innerHTML = '<b>'+schedules_array[6]+'</b>/'+getValue('Small Warships'+(r-1));
 
          newCell = table.rows[r].insertCell(start+6);
-         newCell.innerHTML = schedules_array[7];
+         newCell.innerHTML = '<b>'+schedules_array[7]+'</b>/'+getValue('Small Merchant Ships'+(r-1));
 
          newCell = table.rows[r].insertCell(start+7);
-         newCell.innerHTML = schedules_array[8];
+         newCell.innerHTML = '<b>'+schedules_array[8]+'</b>/'+getValue('Colonization Ships'+(r-1));
       }
    }
 }
