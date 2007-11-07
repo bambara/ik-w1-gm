@@ -158,19 +158,6 @@ DateHelper.getDateTime = function (time) {
 
 function init(){
    
-   // add a menu for easier browsing
-   var msg = "<a href='http://213.203.194.123/us/1/index.php?s=" + gup('s') + "&p=b1'>Main House</a>";
-   msg += "&nbsp;-&nbsp;<a href='http://213.203.194.123/us/1/index.php?s=" + gup('s') + "&p=b5'>Laboratory</a>";
-   msg += "&nbsp;-&nbsp;<a href='http://213.203.194.123/us/1/index.php?s=" + gup('s') + "&p=b6'>Barracks</a>";
-   msg += "&nbsp;-&nbsp;<a href='http://213.203.194.123/us/1/index.php?s=" + gup('s') + "&p=b7'>Harbour</a>";
-   if(gup('p') != 'isles') msg += "&nbsp;-&nbsp;<a href='http://213.203.194.123/us/1/index.php?s=" + gup('s') + "&p=isles'>Islands</a>";
-   var theDIV = document.createElement('div');
-   theDIV.style.padding = '10px';
-   theDIV.style.paddingBottom = '0px';
-
-   theDIV.innerHTML = msg;
-   pseudoInsertAfter(theDIV, document.getElementsByTagName('table')[0]);
-
    var scripts = document.getElementsByTagName('script');
    for( var i = 0, oElement; oElement = scripts[i]; ++i ) {
       // deze regexp werkt niet global! maar als ik g vlag bijvoeg, wil het helemaal niet meer matchen.
@@ -509,6 +496,50 @@ function parseTableCells(){
    }
 }
 
+function keyupEventTextInput(){
+   var r = parseInt(this.id);
+   if (this.value == 0) {  
+      document.getElementById((r + 'info')).style.display = 'none'; 
+   }else { 
+      document.getElementById((r + 'info')).style.display = 'block';
+   }
+   document.getElementById(r + 'gold').innerHTML = this.value * golds[r];
+   if (gold < this.value * golds[r]) { 
+      document.getElementById(r + 'gold').style.color = 'red'; 
+   } else { 
+      document.getElementById(r + 'gold').style.color = 'green'; 
+   }
+   document.getElementById(r + 'stone').innerHTML = this.value * stones[r];
+   if (stone < this.value * stones[r]) { 
+      document.getElementById(r + 'stone').style.color = 'red'; 
+   } else { 
+      document.getElementById(r + 'stone').style.color = 'green'; 
+   }
+   document.getElementById(r + 'wood').innerHTML = this.value * woods[r];
+   if (wood < this.value * woods[r]) { 
+      document.getElementById(r + 'wood').style.color = 'red'; 
+   } else { 
+      document.getElementById(r + 'wood').style.color = 'green';
+   }
+   var mydur = this.value * durs[r];
+   mydur = (mydur == 0 ? '-' : (DateHelper.getDuration(mydur) + '<br>&nbsp;&nbsp;&nbsp;&nbsp;(' + DateHelper.getDateTime( new Date().getTime() + mydur * 1000 ) + ')'));
+   document.getElementById(r + 'dur').innerHTML = mydur;
+   var goldwait = ((this.value * golds[r]) - "+gold+") * 3600 / goldprod;
+   var stonewait = ((this.value * stones[r]) - "+stone+") * 3600 / stoneprod;
+   var woodwait = ((this.value * woods[r]) - "+wood+") * 3600 / woodprod;
+   var longestwait = Math.round(Math.max(goldwait, stonewait, woodwait));
+   // var myclock = null;
+   var myneeded = '-';
+   if (longestwait > 0) {
+      // TODO: clock hieronder werkt wel, maar je kan ze niet weg krijgen!
+      // oplossing: wegdoen van lijst observers, maar nogal moeilijk ;-)
+      // myclock = new Clock( timer, document.getElementById(r + 'needed'), longestwait );
+      
+      myneeded = DateHelper.getDuration(longestwait) + '<br>&nbsp;&nbsp;&nbsp;&nbsp;(' + DateHelper.getDateTime( new Date().getTime() + longestwait * 1000 ) + ')';
+   }
+   document.getElementById(r + 'needed').innerHTML = myneeded;
+}
+
 function parseIn(){
    var inputs = document.getElementsByTagName('input');
 
@@ -516,34 +547,8 @@ function parseIn(){
       //alert(oElement.type);
       if (oElement.type == 'text') {
          if (oElement.name == 'number') {
-            var keyupEvent = " var r = parseInt(this.id);"+
-            "if (this.value == 0) {  document.getElementById((r + 'info')).style.display = 'none'; }"+
-            "else { document.getElementById((r + 'info')).style.display = 'block';}"+
-            "document.getElementById(r + 'gold').innerHTML = this.value * "+golds[numbercounter]+";"+
-            "if ("+gold+" < this.value * "+golds[numbercounter]+") { document.getElementById(r + 'gold').style.color = 'red'; } else { document.getElementById(r + 'gold').style.color = 'green'; }"+
-            "document.getElementById(r + 'stone').innerHTML = this.value * "+stones[numbercounter]+";"+
-            "if ("+stone+" < this.value * "+stones[numbercounter]+") { document.getElementById(r + 'stone').style.color = 'red'; } else { document.getElementById(r + 'stone').style.color = 'green'; }"+
-            "document.getElementById(r + 'wood').innerHTML = this.value * "+woods[numbercounter]+";"+
-            "if ("+wood+" < this.value * "+woods[numbercounter]+") { document.getElementById(r + 'wood').style.color = 'red'; } else { document.getElementById(r + 'wood').style.color = 'green'; }"+
-            "var mydur = this.value * "+durs[numbercounter]+";"+
-            "mydur = (mydur == 0 ? '-' : (DateHelper.getDuration(mydur) + '<br>&nbsp;&nbsp;&nbsp;&nbsp;(' + DateHelper.getDateTime( new Date().getTime() + mydur * 1000 ) + ')'));"+
-            "document.getElementById(r + 'dur').innerHTML = mydur;"+
-            "var goldwait = ((this.value * "+golds[numbercounter]+") - "+gold+") * 3600 / "+goldprod+";"+
-            "var stonewait = ((this.value * "+stones[numbercounter]+") - "+stone+") * 3600 / "+stoneprod+";"+
-            "var woodwait = ((this.value * "+woods[numbercounter]+") - "+wood+") * 3600 / "+woodprod+";"+
-            "var longestwait = Math.round(Math.max(goldwait, stonewait, woodwait));"+
-            "// var myclock = null;"+
-            "var myneeded = '-';"+
-            "if (longestwait > 0) {"+
-            "   // TODO: clock hieronder werkt wel, maar je kan ze niet weg krijgen!"+
-            "   // oplossing: wegdoen van lijst observers, maar nogal moeilijk ;-)"+
-            "   // myclock = new Clock( timer, document.getElementById(r + 'needed'), longestwait );"+
-            "   "+
-            "   myneeded = DateHelper.getDuration(longestwait) + '<br>&nbsp;&nbsp;&nbsp;&nbsp;(' + DateHelper.getDateTime( new Date().getTime() + longestwait * 1000 ) + ')';"+
-            "}"+
-            "document.getElementById(r + 'needed').innerHTML = myneeded;"
             oElement.setAttribute('id', numbercounter + "input");
-            oElement.setAttribute('onkeyup', keyupEvent);
+            oElement.addEventListener('keyup', keyupEventTextInput, false);
             theCell = cells[(3 + (numbercounter * 3))];
             theCell.innerHTML += "<div id='" + numbercounter + "info' style='display: none'>"+
                                  "<b>Needed:</b> Gold: <span id='" + numbercounter + "gold' style='color: green'>0</span> "+
@@ -557,120 +562,30 @@ function parseIn(){
          // update the unit and resources count
          else if (oElement.name == 'form[s1]') { //LWS
             oElement.title = '5 units';
-            oElement.setAttribute('onkeyup', "var units = 0, resources = 0;"+
-                                             "for (var i = 0; i < form.elements.length; ++i) {"+
-                                             "   var whowhat = form.elements[i].title.split(' ');"+
-                                             "   if (whowhat[1] == 'units') {"+
-                                             "      units += parseInt(whowhat[0]) * parseInt(form.elements[i].value);"+
-                                             "   }"+
-                                             "   else if (whowhat[1] == 'resources') {"+
-                                             "      resources += parseInt(whowhat[0]) * parseInt(form.elements[i].value);"+
-                                             "   }"+
-                                             "}"+
-                                             "if (document.getElementById('orders_units')) {"+
-                                             "   document.getElementById('orders_units').innerHTML = units;"+
-                                             "}"+
-                                             "if (document.getElementById('orders_res')) {"+
-                                             "   document.getElementById('orders_res').innerHTML = resources;"+
-                                             "}");
+            oElement.addEventListener('keyup', function () { updateUnitsResources(this.form); }, false);
          }
          else if (oElement.name == 'form[s2]') { //LMS
             oElement.title = '500 resources';
-            oElement.setAttribute('onkeyup', "var units = 0, resources = 0;"+
-                                             "for (var i = 0; i < form.elements.length; ++i) {"+
-                                             "   var whowhat = form.elements[i].title.split(' ');"+
-                                             "   if (whowhat[1] == 'units') {"+
-                                             "      units += parseInt(whowhat[0]) * parseInt(form.elements[i].value);"+
-                                             "   }"+
-                                             "   else if (whowhat[1] == 'resources') {"+
-                                             "      resources += parseInt(whowhat[0]) * parseInt(form.elements[i].value);"+
-                                             "   }"+
-                                             "}"+
-                                             "if (document.getElementById('orders_units')) {"+
-                                             "   document.getElementById('orders_units').innerHTML = units;"+
-                                             "}"+
-                                             "if (document.getElementById('orders_res')) {"+
-                                             "   document.getElementById('orders_res').innerHTML = resources;"+
-                                             "}");
+            oElement.addEventListener('keyup', function () { updateUnitsResources(this.form); }, false);
          }
          else if (oElement.name == 'form[s3]') { //SWS
             oElement.title = '2 units';
-            oElement.setAttribute('onkeyup', "var units = 0, resources = 0;"+
-                                             "for (var i = 0; i < form.elements.length; ++i) {"+
-                                             "   var whowhat = form.elements[i].title.split(' ');"+
-                                             "   if (whowhat[1] == 'units') {"+
-                                             "      units += parseInt(whowhat[0]) * parseInt(form.elements[i].value);"+
-                                             "   }"+
-                                             "   else if (whowhat[1] == 'resources') {"+
-                                             "      resources += parseInt(whowhat[0]) * parseInt(form.elements[i].value);"+
-                                             "   }"+
-                                             "}"+
-                                             "if (document.getElementById('orders_units')) {"+
-                                             "   document.getElementById('orders_units').innerHTML = units;"+
-                                             "}"+
-                                             "if (document.getElementById('orders_res')) {"+
-                                             "   document.getElementById('orders_res').innerHTML = resources;"+
-                                             "}");
+            oElement.addEventListener('keyup', function () { updateUnitsResources(this.form); }, false);
          }
          else if (oElement.name == 'form[s4]') { //SMS
             oElement.title = '200 resources';
-            oElement.setAttribute('onkeyup', "var units = 0, resources = 0;"+
-                                             "for (var i = 0; i < form.elements.length; ++i) {"+
-                                             "   var whowhat = form.elements[i].title.split(' ');"+
-                                             "   if (whowhat[1] == 'units') {"+
-                                             "      units += parseInt(whowhat[0]) * parseInt(form.elements[i].value);"+
-                                             "   }"+
-                                             "   else if (whowhat[1] == 'resources') {"+
-                                             "      resources += parseInt(whowhat[0]) * parseInt(form.elements[i].value);"+
-                                             "   }"+
-                                             "}"+
-                                             "if (document.getElementById('orders_units')) {"+
-                                             "   document.getElementById('orders_units').innerHTML = units;"+
-                                             "}"+
-                                             "if (document.getElementById('orders_res')) {"+
-                                             "   document.getElementById('orders_res').innerHTML = resources;"+
-                                             "}");
+            oElement.addEventListener('keyup', function () { updateUnitsResources(this.form); }, false);
          }
          else if (oElement.name == 'form[s5]') { //Colo
             oElement.title = '5000 resources';
-            oElement.setAttribute('onkeyup', "var units = 0, resources = 0;"+
-                                             "for (var i = 0; i < form.elements.length; ++i) {"+
-                                             "   var whowhat = form.elements[i].title.split(' ');"+
-                                             "   if (whowhat[1] == 'units') {"+
-                                             "      units += parseInt(whowhat[0]) * parseInt(form.elements[i].value);"+
-                                             "   }"+
-                                             "   else if (whowhat[1] == 'resources') {"+
-                                             "      resources += parseInt(whowhat[0]) * parseInt(form.elements[i].value);"+
-                                             "   }"+
-                                             "}"+
-                                             "if (document.getElementById('orders_units')) {"+
-                                             "   document.getElementById('orders_units').innerHTML = units;"+
-                                             "}"+
-                                             "if (document.getElementById('orders_res')) {"+
-                                             "   document.getElementById('orders_res').innerHTML = resources;"+
-                                             "}");
+            oElement.addEventListener('keyup', function () { updateUnitsResources(this.form); }, false);
          }
 
          // also on ordering page
          // but it needs a few tricks ;-)
          else if (oElement.name == 'form[u1]') { //stone thrower
             oElement.title = '1 units';
-            oElement.setAttribute('onkeyup', "var units = 0, resources = 0;"+
-                                             "for (var i = 0; i < form.elements.length; ++i) {"+
-                                             "   var whowhat = form.elements[i].title.split(' ');"+
-                                             "   if (whowhat[1] == 'units') {"+
-                                             "      units += parseInt(whowhat[0]) * parseInt(form.elements[i].value);"+
-                                             "   }"+
-                                             "   else if (whowhat[1] == 'resources') {"+
-                                             "      resources += parseInt(whowhat[0]) * parseInt(form.elements[i].value);"+
-                                             "   }"+
-                                             "}"+
-                                             "if (document.getElementById('orders_units')) {"+
-                                             "   document.getElementById('orders_units').innerHTML = units;"+
-                                             "}"+
-                                             "if (document.getElementById('orders_res')) {"+
-                                             "   document.getElementById('orders_res').innerHTML = resources;"+
-                                             "}");
+            oElement.addEventListener('keyup', function () { updateUnitsResources(this.form); }, false);
             if (gup('a') == 'fleetsave') {
                var a = oElement.parentNode.parentNode.innerHTML.match(/<b>(.+?) \((\d+)\)<\/b>/i);
                if (a) { units['u1'] = parseInt(a[2]); }
@@ -678,22 +593,7 @@ function parseIn(){
          }
          else if (oElement.name == 'form[u2]') { //spearfighter
             oElement.title = '1 units';
-            oElement.setAttribute('onkeyup', "var units = 0, resources = 0;"+
-                                             "for (var i = 0; i < form.elements.length; ++i) {"+
-                                             "   var whowhat = form.elements[i].title.split(' ');"+
-                                             "   if (whowhat[1] == 'units') {"+
-                                             "      units += parseInt(whowhat[0]) * parseInt(form.elements[i].value);"+
-                                             "   }"+
-                                             "   else if (whowhat[1] == 'resources') {"+
-                                             "      resources += parseInt(whowhat[0]) * parseInt(form.elements[i].value);"+
-                                             "   }"+
-                                             "}"+
-                                             "if (document.getElementById('orders_units')) {"+
-                                             "   document.getElementById('orders_units').innerHTML = units;"+
-                                             "}"+
-                                             "if (document.getElementById('orders_res')) {"+
-                                             "   document.getElementById('orders_res').innerHTML = resources;"+
-                                             "}");
+            oElement.addEventListener('keyup', function () { updateUnitsResources(this.form); }, false);
             if (gup('a') == 'fleetsave') {
                var a = oElement.parentNode.parentNode.innerHTML.match(/<b>(.+?) \((\d+)\)<\/b>/i);
                if (a) { units['u2'] = parseInt(a[2]); }
@@ -701,22 +601,7 @@ function parseIn(){
          }
          else if (oElement.name == 'form[u3]') { //archer
             oElement.title = '1 units';
-            oElement.setAttribute('onkeyup', "var units = 0, resources = 0;"+
-                                             "for (var i = 0; i < form.elements.length; ++i) {"+
-                                             "   var whowhat = form.elements[i].title.split(' ');"+
-                                             "   if (whowhat[1] == 'units') {"+
-                                             "      units += parseInt(whowhat[0]) * parseInt(form.elements[i].value);"+
-                                             "   }"+
-                                             "   else if (whowhat[1] == 'resources') {"+
-                                             "      resources += parseInt(whowhat[0]) * parseInt(form.elements[i].value);"+
-                                             "   }"+
-                                             "}"+
-                                             "if (document.getElementById('orders_units')) {"+
-                                             "   document.getElementById('orders_units').innerHTML = units;"+
-                                             "}"+
-                                             "if (document.getElementById('orders_res')) {"+
-                                             "   document.getElementById('orders_res').innerHTML = resources;"+
-                                             "}");
+            oElement.addEventListener('keyup', function () { updateUnitsResources(this.form); }, false);
             if (gup('a') == 'fleetsave') {
                var a = oElement.parentNode.parentNode.innerHTML.match(/<b>(.+?) \((\d+)\)<\/b>/i);
                if (a) { units['u3'] = parseInt(a[2]); }
@@ -732,60 +617,15 @@ function parseIn(){
          }
          else if (oElement.name == 'form[gold]') { //gold
             oElement.title = '1 resources';
-            oElement.setAttribute('onkeyup', "var units = 0, resources = 0;"+
-                                             "for (var i = 0; i < form.elements.length; ++i) {"+
-                                             "   var whowhat = form.elements[i].title.split(' ');"+
-                                             "   if (whowhat[1] == 'units') {"+
-                                             "      units += parseInt(whowhat[0]) * parseInt(form.elements[i].value);"+
-                                             "   }"+
-                                             "   else if (whowhat[1] == 'resources') {"+
-                                             "      resources += parseInt(whowhat[0]) * parseInt(form.elements[i].value);"+
-                                             "   }"+
-                                             "}"+
-                                             "if (document.getElementById('orders_units')) {"+
-                                             "   document.getElementById('orders_units').innerHTML = units;"+
-                                             "}"+
-                                             "if (document.getElementById('orders_res')) {"+
-                                             "   document.getElementById('orders_res').innerHTML = resources;"+
-                                             "}");
+            oElement.addEventListener('keyup', function () { updateUnitsResources(this.form); }, false);
          }
          else if (oElement.name == 'form[stones]') { //stone
             oElement.title = '1 resources';
-            oElement.setAttribute('onkeyup', "var units = 0, resources = 0;"+
-                                             "for (var i = 0; i < form.elements.length; ++i) {"+
-                                             "   var whowhat = form.elements[i].title.split(' ');"+
-                                             "   if (whowhat[1] == 'units') {"+
-                                             "      units += parseInt(whowhat[0]) * parseInt(form.elements[i].value);"+
-                                             "   }"+
-                                             "   else if (whowhat[1] == 'resources') {"+
-                                             "      resources += parseInt(whowhat[0]) * parseInt(form.elements[i].value);"+
-                                             "   }"+
-                                             "}"+
-                                             "if (document.getElementById('orders_units')) {"+
-                                             "   document.getElementById('orders_units').innerHTML = units;"+
-                                             "}"+
-                                             "if (document.getElementById('orders_res')) {"+
-                                             "   document.getElementById('orders_res').innerHTML = resources;"+
-                                             "}");
+            oElement.addEventListener('keyup', function () { updateUnitsResources(this.form); }, false);
          }
          else if (oElement.name == 'form[wood]') { //lumber
             oElement.title = '1 resources';
-            oElement.setAttribute('onkeyup', "var units = 0, resources = 0;"+
-                                             "for (var i = 0; i < form.elements.length; ++i) {"+
-                                             "   var whowhat = form.elements[i].title.split(' ');"+
-                                             "   if (whowhat[1] == 'units') {"+
-                                             "      units += parseInt(whowhat[0]) * parseInt(form.elements[i].value);"+
-                                             "   }"+
-                                             "   else if (whowhat[1] == 'resources') {"+
-                                             "      resources += parseInt(whowhat[0]) * parseInt(form.elements[i].value);"+
-                                             "   }"+
-                                             "}"+
-                                             "if (document.getElementById('orders_units')) {"+
-                                             "   document.getElementById('orders_units').innerHTML = units;"+
-                                             "}"+
-                                             "if (document.getElementById('orders_res')) {"+
-                                             "   document.getElementById('orders_res').innerHTML = resources;"+
-                                             "}");
+            oElement.addEventListener('keyup', function () { updateUnitsResources(this.form); }, false);
          }
       }
       else if (oElement.type == 'submit') {
@@ -797,8 +637,11 @@ function parseIn(){
             buttX.type = 'button';
             buttX.value = 'X';
             buttX.id = numbercounter + 'buttX';
-            buttX.setAttribute('onclick', "var r = parseInt(this.id) - 1; "+
-                                           "document.getElementById(r+\"input\").value = 0;");
+            buttX.addEventListener('click', 
+                                    function () {
+                                       var r = parseInt(this.id) - 1;
+                                       document.forms[r].elements[0].value = 0;
+                                    }, false);
             par.appendChild(buttX);
 
             par.appendChild(document.createElement('br'));
@@ -806,24 +649,30 @@ function parseIn(){
             buttMax.type = 'button';
             buttMax.value = 'Max';
             buttMax.id = numbercounter + 'buttMax';
-            buttMax.setAttribute('onclick', "var r = parseInt(this.id) - 1; "+
-                                            "var maxG = Math.floor("+gold+" / "+golds[numbercounter-1]+");"+
-                                            "var maxS = Math.floor("+stone+" / "+stones[numbercounter-1]+");"+
-                                            "var maxW = Math.floor("+wood+" / "+woods[numbercounter-1]+");"+
-                                            "document.getElementById(r+\"input\").value = Math.min(Math.min(maxG, maxS), maxW);");
+            buttMax.addEventListener('click', 
+                                    function () {
+                                       var r = parseInt(this.id) - 1;
+                                       var maxG = Math.floor(gold / golds[r]);
+                                       var maxS = Math.floor(stone / stones[r]);
+                                       var maxW = Math.floor(wood / woods[r]);
+                                       document.forms[r].elements[0].value = Math.min(Math.min(maxG, maxS), maxW);
+                                    }, false);
             par.appendChild(buttMax);
 
             var buttDay = document.createElement('input');
             buttDay.type = 'button';
             buttDay.value = 'Day';
-            buttDay.id = numbercounter + 'buttMax';
-            buttDay.setAttribute('onclick', "var r = parseInt(this.id) - 1; "+
-                                            "var maxG = Math.floor("+gold+" / "+golds[numbercounter-1]+");"+
-                                            "var maxS = Math.floor("+stone+" / "+stones[numbercounter-1]+");"+
-                                            "var maxW = Math.floor("+wood+" / "+woods[numbercounter-1]+");"+
-                                            "var amountMax = Math.min(Math.min(maxG, maxS), maxW);"+
-                                            "var amountDay = Math.floor(86400 / "+durs[numbercounter-1]+");"+
-                                            "document.getElementById(r+\"input\").value = Math.min(amountMax, amountDay);");
+            buttDay.id = numbercounter + 'buttDay';
+            buttDay.addEventListener('click', 
+                                    function () {
+                                       var r = parseInt(this.id) - 1;
+                                       var maxG = Math.floor(gold / golds[r]);
+                                       var maxS = Math.floor(stone / stones[r]);
+                                       var maxW = Math.floor(wood / woods[r]);
+                                       var amountMax = Math.min(Math.min(maxG, maxS), maxW);
+                                       var amountDay = Math.floor(86400 / durs[r]);
+                                       document.forms[r].elements[0].value = Math.min(amountMax, amountDay);
+                                    }, false);
             par.appendChild(buttDay);
             buttDay.click();
 
@@ -833,16 +682,22 @@ function parseIn(){
             buttp1.type = 'button';
             buttp1.value = '+1';
             buttp1.id = numbercounter + 'buttp1';
-            buttp1.setAttribute('onclick', "var r = parseInt(this.id) - 1; "+
-                                            "document.getElementById(r+\"input\").value = parseInt(document.getElementById(r+\"input\").value) + 1;");
+            buttp1.addEventListener('click',  
+                                    function () {
+                                       var r = parseInt(this.id) - 1;
+                                       document.forms[r].elements[0].value = parseInt(document.forms[r].elements[0].value) + 1;
+                                    }, false);
             par.appendChild(buttp1);
 
             var buttp5 = document.createElement('input');
             buttp5.type = 'button';
             buttp5.value = '+5';
             buttp5.id = numbercounter + 'buttp1';
-            buttp5.setAttribute('onclick', "var r = parseInt(this.id) - 1; "+
-                                           "document.getElementById(r+\"input\").value = parseInt(document.getElementById(r+\"input\").value) + 5;");
+            buttp5.addEventListener('click',  
+                                    function () {
+                                       var r = parseInt(this.id) - 1;
+                                       document.forms[r].elements[0].value = parseInt(document.forms[r].elements[0].value) + 5;
+                                    }, false);
             par.appendChild(buttp5);
 
          }
@@ -877,9 +732,17 @@ function parseIn(){
             updateUnitsResources(oElement.form);
          }
          else if (oElement.value == 'Spy') {
-            oElement.setAttribute('onclick', "if ((this.form[\"form[s1]\"]?this.form[\"form[s1]\"].value:0) + (this.form[\"form[s3]\"]?this.form[\"form[s3]\"].value:0) == 0) {"+
-                  "if (this.form[\"form[s3]\"]) { this.form[\"form[s3]\"].value = 1; }"+
-                  "else if (this.form[\"form[s1]\"]) { this.form[\"form[s1]\"].value = 1;}}");
+            oElement.addEventListener('click',  
+                                    function () {
+                                       if ((this.form[form[s1]]?this.form[form[s1]].value:0) + (this.form[form[s3]]?this.form[form[s3]].value:0) == 0) {
+                                          if (this.form[form[s3]]) { 
+                                             this.form[form[s3]].value = 1; 
+                                          }
+                                          else if (this.form[form[s1]]) { 
+                                             this.form[form[s1]].value = 1;
+                                          }
+                                       }
+                                    }, false);
          }
       }
 
@@ -913,6 +776,32 @@ function parseDivs(){
       // add a few links
       if (oElement.className == "signout") {
          oElement.innerHTML = "<a href='http://www.inselkampf.com/index.php?controller=help' target='_blank'>Help</a>&nbsp;&nbsp;" + oElement.innerHTML;
+      }
+      
+      if (oElement.className == "island") {
+         // add a menu for easier browsing
+         var a = oElement.getElementsByTagName('a');
+         
+         var mh = document.createElement('a');
+         mh.setAttribute('href', "/us/1/index.php?s=" + gup('s') + "&p=b1");
+         mh.innerHTML = 'Main House  ';
+         
+         var lab = document.createElement('a');
+         lab.setAttribute('href', "/us/1/index.php?s=" + gup('s') + "&p=b5");
+         lab.innerHTML = 'Laboratory  ';
+         
+         var bar = document.createElement('a');
+         bar.setAttribute('href', "/us/1/index.php?s=" + gup('s') + "&p=b6");
+         bar.innerHTML = 'Barracks  ';
+         
+         var har = document.createElement('a');
+         har.setAttribute('href', "/us/1/index.php?s=" + gup('s') + "&p=b7");
+         har.innerHTML = 'Harbour  ';
+
+         oElement.insertBefore(har, a[1]);
+         oElement.insertBefore(bar, a[1]);
+         oElement.insertBefore(lab, a[1]);
+         oElement.insertBefore(mh, a[1]);
       }
 
       // barracks & harbour & laboratory
@@ -1233,18 +1122,43 @@ function getPlayerName(){
 function addUpdateSection(){
    var newdiv = document.createElement('div');
    newdiv.className = 'update';
+   
    var a = document.createElement('button');
    a.innerHTML = 'Update';
    a.addEventListener("click", updateIslandData, true);
+   
    var text = document.createTextNode('Ready');
+   
    var text2 = document.createTextNode('Last Update done : ');
+   
    var sep = document.createTextNode(' | ');
+   
    var bold = document.createElement('b');
    bold.setAttribute('id', 'islandtext');
+   
    var bold2 = document.createElement('b');
    bold2.setAttribute('id', 'updatedate');
+   
    var sep2 = document.createTextNode(' | ');
+   
    var dat = document.createTextNode(GM_getValue(playername+'updatedate', new Date().toLocaleString()));
+   
+   var sep3 = document.createTextNode(' | ');
+   
+   var HarbourCheckbox = document.createElement('input');
+   HarbourCheckbox.type = 'checkbox';
+   HarbourCheckbox.id = 'getHarbourData';
+   HarbourCheckbox.defaultChecked = false;
+   
+   var HarbourLabel = document.createElement('label');
+   HarbourLabel.htmlFor = 'getHarbourData';
+   
+   var HarbourText = document.createTextNode("Harbour : ");
+   
+   var bold3 = document.createElement('b');
+   
+   bold3.appendChild(HarbourText);
+   HarbourLabel.appendChild(bold3);
    newdiv.appendChild(a);
    newdiv.appendChild(sep2);
    bold.appendChild(text);
@@ -1253,69 +1167,115 @@ function addUpdateSection(){
    bold2.appendChild(text2);
    newdiv.appendChild(bold2);
    newdiv.appendChild(dat);
+   newdiv.appendChild(sep3);
+   newdiv.appendChild(HarbourLabel);
+      newdiv.appendChild(HarbourCheckbox);
    newdiv.align = 'left';
-   addGlobalStyle('.navigation { width:40%;}');
+   addGlobalStyle('.navigation { width:100%;}');
    addGlobalStyle('.table { padding-top: 10px; }');
    addGlobalStyle(".update { padding-left: 20px; "+
                   "background-color:#F0F0F0; margin:1px; padding:3px;"+
-                  "text-align:center; width:40%;}");
+                  "text-align:center; width:100%;}");
 
    document.getElementsByTagName('body')[0].insertBefore(newdiv, document.getElementsByTagName('br')[1]);
 }
 
 function updateIslandData(){
-   parseURL(getValue('href'+0), 0);
+   parseURL(0, -1, 0);
 }
 
 var retryCount = 0;
 
 var maxRetry = 3;
 
-function parseURL(theURL, isleNum){
-   GM_xmlhttpRequest({
-        method: 'GET',
-        url: theURL,
-        headers: {
-            'User-agent': 'Mozilla/4.0 (compatible)',
-            'Accept': 'text/html'
-        },
-        onload: function(responseDetails) {
-            if (responseDetails.status !== 200) {
-                var debugMessage = "error in parseURL onload " + responseDetails.status + " island " + isleNum + "<br>";
-                retryCount++;
-                if (retryCount > maxRetry) {
-                    document.getElementById('islandtext').innerHTML = "Error: server health";
-                    debugMessage += "Too many failures. Bailing<br>";
-                    GM_log(debugMessage);
-                    exit();
-                } else{
-                    alert(responseDetails.responseText);
-                    document.getElementById('islandtext').innerHTML = "Done!!!"
-                }
+var eventsID = [];
 
-            }else{
-               if(isleNum < getValue('numIslands')){
-                  document.getElementById('islandtext').innerHTML = "     Loading : "+getValue('Name'+isleNum);
-                  parseURLResult(responseDetails.responseText, isleNum);
-                  if((isleNum+1) >= getValue('numIslands')){
-                     setValue('updatedate', new Date().toLocaleString());
-                     document.getElementById('islandtext').innerHTML = "     Done!!!";
-                     document.getElementById('updatedate').innerHTML = getValue('updatedate');
-                     location.reload(true);
-                  }else{
-                     parseURL(getValue('href'+(isleNum+1)), (isleNum+1));
+function parseURL(iteration, sudIteration, isleNum){
+   var theURL = '';
+   switch (iteration) {
+   case 0:        // Main Page
+      theURL = getValue('href'+isleNum);
+      break;
+   case 1:        // Harbour Page
+      theURL = window.location.toString();
+      theURL = theURL.replace(gup('p'), 'b7');
+      if(sudIteration != -1){    // Harbour Event Page
+         theURL = theURL+'&sub=show&id='+eventsID[sudIteration];
+      }
+      break;
+   }
+   if(isleNum < getValue('numIslands')){
+      GM_xmlhttpRequest({
+            method: 'GET',
+            url: theURL,
+            headers: {
+               'User-agent': 'Mozilla/4.0 (compatible)',
+               'Accept': 'text/html'
+            },
+            onload: function(responseDetails) {
+               if (responseDetails.status !== 200) {
+                  var debugMessage = "error in parseURL onload " + responseDetails.status + " island " + isleNum + "<br>";
+                  retryCount++;
+                  if (retryCount > maxRetry) {
+                     document.getElementById('islandtext').innerHTML = "Error: server health";
+                     debugMessage += "Too many failures. Bailing<br>";
+                     GM_log(debugMessage);
+                     exit();
+                  } else{
+                     document.getElementById('islandtext').innerHTML = "Done!!!"
                   }
+                  
+               }else{
+                  switch (iteration) {
+                  case 0:
+                     document.getElementById('islandtext').innerHTML = "     Loading : "+getValue('Name'+isleNum);
+                     parseURLResult(responseDetails.responseText, isleNum);
+                     if(document.getElementById('getHarbourData').checked){
+                        parseURL( 1, -1, isleNum); //Parse Harbour page!
+                     }else{
+                        parseURL( 0, -1, (isleNum+1));
+                     }
+                     break;
+                  case 1:
+                     if(sudIteration == -1){
+                        var s = responseDetails.responseText;
+                        var Rx= /&p=b7&sub=show&id\=([0-9]*)/g;
+                        var pat;
+                        while(s && (pat= Rx.exec(s))!= null){
+                           eventsID.push(pat[1]);
+                        }
+                        if(eventsID.length != 0){ //There is events!
+                           parseURL( 1, 0, isleNum);
+                        }else{    //No events, parse next Main Page
+                           parseURL( 0, -1, (isleNum+1));
+                        }
+                     }else{
+                        if(sudIteration < eventsID.length){
+                           parseHarbourEvents(responseDetails.responseText, isleNum);
+                           if((sudIteration+1) >= eventsID.length){ //last event, parse next Main Page
+                              parseURL( 0, -1, (isleNum+1));
+                           }else{
+                              parseURL( 1, (sudIteration+1), isleNum);
+                           }
+                        }
+                     }
+                     break;
+                  }
+                  
                }
+            },
+            onerror: function(responseDetails) {
+               document.getElementById('islandtext').innerHTML = "     Done!!!";
+               var debugMessage = "error in sub onerror " + responseDetails.status + " island " + isleNum + "<br>";
+               GM_log(debugMessage);
             }
-        },
-        onerror: function(responseDetails) {
-           document.getElementById('islandtext').innerHTML = "     Done!!!";
-           var debugMessage = "error in sub onerror " + responseDetails.status + " island " + isleNum + "<br>";
-           GM_log(debugMessage);
-        }
-
-    }); //end xmlrequest
-
+      }); //end xmlrequest
+   }else{
+      setValue('updatedate', new Date().toLocaleString());
+      document.getElementById('islandtext').innerHTML = "     Done!!!";
+      document.getElementById('updatedate').innerHTML = getValue('updatedate');
+      location.reload(true);
+   }
 }
 
 function parseURLResult(result, isle){
@@ -1403,28 +1363,52 @@ function parseURLResult(result, isle){
    calculate_score(isle);
 }
 
-function parseMainHouse(){
-   var mhLink = document.location.toString();
-   mhLink = mhLink.replace(gup('p'), 'b1')
-   alert(mhLink);
-}
-
-function parseLaboratory(){
-   var LabLink = document.location.toString();
-   LabLink = LabLink.replace(gup('p'), 'b5')
-   alert(LabLink);
-}
-
-function parseBarracks(){
-   var BarLink = document.location.toString();
-   BarLink = BarLink.replace(gup('p'), 'b6')
-   alert(BarLink);
-}
-
-function parseHarbour(){
-   var HarLink = document.location.toString();
-   HarLink = HarLink.replace(gup('p'), 'b7')
-   alert(HarLink);
+function parseHarbourEvents(s, isle){
+   var arch = s.match(/Archers<\/td><td>([0-9]*)<\/td>/);
+   if(arch) {
+      var a = parseInt(getValue('Archers'+isle)) + parseInt(arch[1]);
+      setValue('Archers'+isle, a);
+   }
+   var st = s.match(/Stone Throwers<\/td><td>([0-9]*)<\/td>/);
+   if(st) {
+      var b = parseInt(getValue('Stone Throwers'+isle)) + parseInt(st[1]);
+      setValue('Stone Throwers'+isle, b);
+   }
+   var sp = s.match(/Spearfighters<\/td><td>([0-9]*)<\/td>/);
+   if(sp) {
+      var c = parseInt(getValue('Spearfighters'+isle)) + parseInt(sp[1]);
+      setValue('Spearfighters'+isle, c);
+   }
+   var cat = s.match(/Catapults<\/td><td>([0-9]*)<\/td>/);
+   if(cat) {
+      var d = parseInt(getValue('Catapults'+isle)) + parseInt(cat[1]);
+      setValue('Catapults'+isle, d);
+   }
+   var lws = s.match(/Large Warships<\/td><td>([0-9]*)<\/td>/);
+   if(lws) {
+      var e = parseInt(getValue('Large Warships'+isle)) + parseInt(lws[1]);
+      setValue('Large Warships'+isle, e);
+   }
+   var sws = s.match(/Small Warships<\/td><td>([0-9]*)<\/td>/);
+   if(sws) {
+      var f = parseInt(getValue('Small Warships'+isle)) + parseInt(sws[1]);
+      setValue('Small Warships'+isle, f);
+   }
+   var lms = s.match(/Large Merchant Ships<\/td><td>([0-9]*)<\/td>/);
+   if(lms) {
+      var g = parseInt(getValue('Large Merchant Ships'+isle)) + parseInt(lms[1]);
+      setValue('Large Merchant Ships'+isle, g);
+   }
+   var sms = s.match(/Small Merchant Ships<\/td><td>([0-9]*)<\/td>/);
+   if(sms) {
+      var h = parseInt(getValue('Small Merchant Ships'+isle)) + parseInt(sms[1]);
+      setValue('Small Merchant Ships'+isle, h);
+   }
+   var colo= s.match(/Colonization Ships<\/td><td>([0-9]*)<\/td>/);
+   if(colo) {
+      var i = parseInt(getValue('Colonization Ships'+isle)) + parseInt(colo[1]);
+      setValue('Colonization Ships'+isle, i);
+   }
 }
 
 function addTableElements(){
