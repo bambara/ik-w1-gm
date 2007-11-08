@@ -1164,101 +1164,28 @@ function addUpdateSection(){
    
    var sep3 = document.createTextNode(' | ');
    
-   var sep4 = document.createTextNode(' | ');
-   
-   var sep5 = document.createTextNode(' | ');
-   
-   var HarbourCheckbox = document.createElement('input');
-   HarbourCheckbox.type = 'checkbox';
-   HarbourCheckbox.id = 'getHarbourData';
-   HarbourCheckbox.defaultChecked = getValue('getHarbourData');
-   HarbourCheckbox.addEventListener("click", 
-                                    function(){ 
-                                       if(document.getElementById('getHarbourData').checked){
-                                          setValue('getHarbourData', true);
-                                       }else{
-                                          setValue('getHarbourData', false);
-                                       }
-                                    }, true);
-   
-   var HarbourLabel = document.createElement('label');
-   HarbourLabel.htmlFor = 'getHarbourData';
-   
-   var HarbourText = document.createTextNode("Harbour");
-   
-   var bold3 = document.createElement('b');
-   
-   bold3.appendChild(HarbourText);
-   HarbourLabel.appendChild(bold3);
-   
-   var MHCheckbox = document.createElement('input');
-   MHCheckbox.type = 'checkbox';
-   MHCheckbox.id = 'getMHData';
-   MHCheckbox.defaultChecked = getValue('getMHData');
-   MHCheckbox.addEventListener("click", 
+   var BCheckbox = document.createElement('input');
+   BCheckbox.type = 'checkbox';
+   BCheckbox.id = 'getBData';
+   BCheckbox.defaultChecked = getValue('getBData');
+   BCheckbox.addEventListener("click", 
                                function(){ 
-                                  if(document.getElementById('getMHData').checked){
-                                     setValue('getMHData', true);
+                                  if(document.getElementById('getBData').checked){
+                                     setValue('getBData', true);
                                   }else{
-                                     setValue('getMHData', false);
+                                     setValue('getBData', false);
                                   }
                                }, true);
    
-   var MHLabel = document.createElement('label');
-   MHLabel.htmlFor = 'getMHData';
+   var BLabel = document.createElement('label');
+   BLabel.htmlFor = 'getBData';
    
-   var MHText = document.createTextNode("Main House");
-   
-   var bold4 = document.createElement('b');
-   
-   bold4.appendChild(MHText);
-   MHLabel.appendChild(bold4);
-   
-   var BarCheckbox = document.createElement('input');
-   BarCheckbox.type = 'checkbox';
-   BarCheckbox.id = 'getBarData';
-   BarCheckbox.defaultChecked = getValue('getBarData');
-   BarCheckbox.addEventListener("click", 
-                                function(){
-                                   if(document.getElementById('getBarData').checked){
-                                      setValue('getBarData', true);
-                                   }else{
-                                      setValue('getBarData', false);
-                                   }
-                                }, true);
-   
-   var BarLabel = document.createElement('label');
-   BarLabel.htmlFor = 'getBarData';
-   
-   var BarText = document.createTextNode("Barracks");
+   var BText = document.createTextNode("Get Buildings Data");
    
    var bold4 = document.createElement('b');
    
-   bold4.appendChild(BarText);
-   BarLabel.appendChild(bold4);
-   
-   var LabCheckbox = document.createElement('input');
-   LabCheckbox.type = 'checkbox';
-   LabCheckbox.id = 'getLabData';
-   LabCheckbox.defaultChecked = getValue('getLabData');
-   LabCheckbox.addEventListener("click", 
-                                function(){ 
-                                   if(document.getElementById('getLabData').checked){
-                                      setValue('getLabData', true);
-                                   }else{
-                                      setValue('getLabData', false);
-                                   }
-                                }, true);
-   
-   var LabLabel = document.createElement('label');
-   LabLabel.htmlFor = 'getLabData';
-   
-   var LabText = document.createTextNode("Laboratory");
-   
-   var bold5 = document.createElement('b');
-   
-   bold5.appendChild(LabText);
-   LabLabel.appendChild(bold5);
+   bold4.appendChild(BText);
+   BLabel.appendChild(bold4);
    
    // Add the components to the newDiv
    newdiv.appendChild(document.createElement('br'));
@@ -1271,20 +1198,9 @@ function addUpdateSection(){
    
    newdiv.appendChild(document.createElement('br'));
    newdiv.appendChild(document.createElement('hr'));
-   newdiv.appendChild(MHCheckbox);
-   newdiv.appendChild(MHLabel);
    
-   newdiv.appendChild(sep3);
-   newdiv.appendChild(LabCheckbox);
-   newdiv.appendChild(LabLabel);
-   
-   newdiv.appendChild(sep4);
-   newdiv.appendChild(HarbourCheckbox);
-   newdiv.appendChild(HarbourLabel);
-   
-   newdiv.appendChild(sep5);
-   newdiv.appendChild(BarCheckbox);
-   newdiv.appendChild(BarLabel);
+   newdiv.appendChild(BCheckbox);
+   newdiv.appendChild(BLabel);
    
    newdiv.appendChild(sep);
    bold2.appendChild(text2);
@@ -1317,6 +1233,18 @@ function parseURL(iteration, sudIteration, isleNum){
          theURL = theURL+'&sub=show&id='+eventsID[sudIteration];
       }
       break;
+   case 2:        // MH Page
+      theURL = window.location.toString();
+      theURL = theURL.replace(gup('p'), 'b1');
+      break;
+   case 3:        // Barracks Page
+      theURL = window.location.toString();
+      theURL = theURL.replace(gup('p'), 'b6');
+      break;
+   case 4:        // Lab Page
+      theURL = window.location.toString();
+      theURL = theURL.replace(gup('p'), 'b5');
+      break;
    }
    if(isleNum < getValue('numIslands')){
       GM_xmlhttpRequest({
@@ -1344,36 +1272,91 @@ function parseURL(iteration, sudIteration, isleNum){
                   case 0:
                      document.getElementById('islandtext').innerHTML = "Loading : "+getValue('Name'+isleNum);
                      parseURLResult(responseDetails.responseText, isleNum);
-                     if(document.getElementById('getHarbourData').checked){
+                     if(document.getElementById('getBData').checked){
                         parseURL( 1, -1, isleNum); //Parse Harbour page!
                      }else{
                         parseURL( 0, -1, (isleNum+1));
                      }
                      break;
                   case 1:
+                     document.getElementById('islandtext').innerHTML = "Loading : "+getValue('Name'+isleNum)+" -> Harbour";
                      if(sudIteration == -1){
-                        document.getElementById('islandtext').innerHTML += " -> Harbour";
                         var s = responseDetails.responseText;
                         var Rx= /&p=b7&sub=show&id\=([0-9]*)/g;
                         var pat;
                         while(s && (pat= Rx.exec(s))!= null){
                            eventsID.push(pat[1]);
                         }
+                        if(getValue('HarBuild'+isleNum)){
+                           var orders = s.match(/All orders: (.+?)</);
+                           if(orders) setValue('HarOrders'+isleNum, 'Orders : '+orders[1]);
+                        }
                         if(eventsID.length != 0){ //There is events!
                            parseURL( 1, 0, isleNum);
-                        }else{    //No events, parse next Main Page
-                           parseURL( 0, -1, (isleNum+1));
+                        }else{    //No events, parse Building Page
+                           if(getValue('MHBuild'+isleNum)){
+                              parseURL( 2, -1, isleNum);
+                           }else if(getValue('BarBuild'+isleNum)){
+                              parseURL( 3, -1, isleNum);
+                           }else if(getValue('LabBuild'+isleNum)){
+                              parseURL( 4, -1, isleNum);
+                           }else{
+                              parseURL( 0, -1, (isleNum+1));
+                           }
                         }
                      }else{
                         if(sudIteration < eventsID.length){
                            parseHarbourEvents(responseDetails.responseText, isleNum);
-                           if((sudIteration+1) >= eventsID.length){ //last event, parse next Main Page
-                              parseURL( 0, -1, (isleNum+1));
+                           if((sudIteration+1) >= eventsID.length){ //last event, parse Building Page
+                              if(getValue('MHBuild'+isleNum)){
+                                 parseURL( 2, -1, isleNum);
+                              }else if(getValue('BarBuild'+isleNum)){
+                                 parseURL( 3, -1, isleNum);
+                              }else if(getValue('LabBuild'+isleNum)){
+                                 parseURL( 4, -1, isleNum);
+                              }else{
+                                 parseURL( 0, -1, (isleNum+1));
+                              }
                            }else{
                               parseURL( 1, (sudIteration+1), isleNum);
                            }
                         }
                      }
+                     break;
+                  case 2:        // MH Page
+                     document.getElementById('islandtext').innerHTML = "Loading : "+getValue('Name'+isleNum)+" -> Main House";
+                     var s = responseDetails.responseText;
+                     var orders = s.match(/Build: (.+?)</);
+                     if(orders) setValue('MHOrders'+isleNum, 'Building : '+orders[1]);
+                     if(getValue('BarBuild'+isleNum)){
+                        parseURL( 3, -1, isleNum);
+                     }else if(getValue('LabBuild'+isleNum)){
+                        parseURL( 4, -1, isleNum);
+                     }else{
+                        parseURL( 0, -1, (isleNum+1));
+                     }
+                     break;
+                  case 3:        // Barracks Page
+                     document.getElementById('islandtext').innerHTML = "Loading : "+getValue('Name'+isleNum)+" -> Barracks";
+                     var s = responseDetails.responseText;
+                     var orders = s.match(/All orders: (.+?)</);
+                     if(orders) setValue('BarOrders'+isleNum, 'Orders : '+orders[1]);
+                     if(getValue('LabBuild'+isleNum)){
+                        parseURL( 4, -1, isleNum);
+                     }else{
+                        parseURL( 0, -1, (isleNum+1));
+                     }
+                     break;
+                  case 4:        // Lab Page
+                     document.getElementById('islandtext').innerHTML = "Loading : "+getValue('Name'+isleNum)+" -> Laboratory";
+                     var s = responseDetails.responseText;
+                     setValue('LabOrders'+isleNum, '');
+                     var orders = s.match(/Research: (.+?)</);
+                     if(orders) setValue('LabOrders'+isleNum, 'Research : '+orders[1]);
+                     var orders2 = s.match(/All orders: (.+?)</);
+                     if(orders2) setValue('LabOrders'+isleNum, getValue('LabOrders'+isleNum)+' Orders : '+orders2[1]);
+                     var s = responseDetails.responseText;
+                     parseURL( 0, -1, (isleNum+1)); //Parse next island
                      break;
                   }
                   
@@ -1640,6 +1623,10 @@ function addTableElements(){
                   newtfootrow.insertCell(4).innerHTML = '';
                   newtfootrow2.insertCell(4).innerHTML = '';
                   for(var r = 1; r < rows.length-2; ++r){
+                     setValue('BarBuild'+(r-1), false);
+                     setValue('HarBuild'+(r-1), false);
+                     setValue('MHBuild'+(r-1),  false);
+                     setValue('LabBuild'+(r-1), false);
                      var buildings = rows[r].getElementsByTagName('td')[4].getElementsByTagName('img');
                      for(var i=0; i<buildings.length; i++){
                         if(buildings[i].src.match(/u_2\.gif/)){
