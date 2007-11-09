@@ -322,10 +322,11 @@ function parseTables(){
                for(var r=2; r<rows.length; r++){
                   var textID = rows[r].getElementsByTagName('td')[0].innerHTML;
                   var ID = textID.match(/id=([0-9]*)/);
+                  var session = textID.match(/s=(.+?)\&/);
                   var retText = textID.match(/Return from/);
                   var newCell = rows[r].insertCell(0);
-                  if(ID && !retText){
-                     newCell.innerHTML = "<input type=\"button\" onclick=\"window.location.href = '/us/1/index.php?s=plkpz44b30mv&p=b7&a=back_fleet&id="+ID[1]+"';\" value=\"Cancel\">";
+                  if(ID && !retText && session){
+                     newCell.innerHTML = "<input type=\"button\" onclick=\"window.location.href = '/us/1/index.php?s="+session[1]+"&p=b7&a=back_fleet&id="+ID[1]+"';\" value=\"Cancel\">";
                   }else{
                      newCell.innerHTML = 'Back';
                   }
