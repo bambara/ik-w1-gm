@@ -243,7 +243,6 @@ function hideElement(name) {
    document.getElementById(name).style.display = 'none';
 }
 
-
 function parseTables(){
    tables = document.getElementsByTagName('table');
    for ( var i = 0; i < tables.length; i++) {
@@ -317,6 +316,43 @@ function parseTables(){
             else if (dataRows[0].innerHTML == '<b>Your fleets</b>') { // harbour page, orders
                // preparation to show how much units and resources you can ship
                tables[i].style.width = '45%';
+               dataRows[0].setAttribute('colspan', '3');
+               var newT = rows[1].insertCell(0);
+               newT.innerHTML = '';
+               for(var r=2; r<rows.length; r++){
+                  var textID = rows[r].getElementsByTagName('td')[0].innerHTML;
+                  var ID = textID.match(/id=([0-9]*)/);
+                  var retText = textID.match(/Return from/);
+                  var newCell = rows[r].insertCell(0);
+                  if(ID && !retText){
+                     newCell.innerHTML = "<input type=\"button\" onclick=\"window.location.href = '/us/1/index.php?s=plkpz44b30mv&p=b7&a=back_fleet&id="+ID[1]+"';\" value=\"Cancel\">";
+                  }else{
+                     newCell.innerHTML = 'Back';
+                  }
+               }
+               tables[i].getElementsByTagName('td')[1].width = '10%';
+            }
+            else if (dataRows[0].innerHTML == '<b>New message</b>') { // New Mail page
+               tables[i].style.width = '40%';
+               tables[i].getElementsByTagName('td')[1].width = '10%';
+               var theText = document.getElementsByTagName('textarea')[0];
+               theText.rows = '30';
+               theText.cols = '80';
+               theText.addEventListener('keyup',
+                  function(){ 
+                     document.getElementById('mes_len').innerHTML = this.value.length;
+                  }, false);
+               document.getElementsByName('form[to]')[0].size = '80';
+               var theSubject = document.getElementsByName('form[subject]')[0];
+               theSubject.size = '80';
+               theSubject.addEventListener('keyup',
+                  function(){
+                     document.getElementById('sub_len').innerHTML = this.value.length;
+                  }, false);
+               var newrow = tables[i].insertRow(rows.length - 1);
+               newrow.insertCell(0);// visuals
+               newrow.insertCell(1).innerHTML = "Subject Length: (<span id='sub_len'>"+theSubject.value.length
+                                                +"</span>) Message Length: (<span id='mes_len'>"+theText.value.length+"</span>)"; 
             }
          }
       }
@@ -738,12 +774,12 @@ function parseIn(){
          else if (oElement.value == 'Spy') {
             oElement.addEventListener('click',  
                                     function () {
-                                       if ((this.form[form[s1]]?this.form[form[s1]].value:0) + (this.form[form[s3]]?this.form[form[s3]].value:0) == 0) {
-                                          if (this.form[form[s3]]) { 
-                                             this.form[form[s3]].value = 1; 
+                                       if ((this.form['form[s1]']?this.form['form[s1]'].value:0) + (this.form['form[s3]']?this.form['form[s3]'].value:0) == 0) {
+                                          if (this.form['form[s3]']) { 
+                                             this.form['form[s3]'].value = 1; 
                                           }
-                                          else if (this.form[form[s1]]) { 
-                                             this.form[form[s1]].value = 1;
+                                          else if (this.form['form[s1]']) { 
+                                             this.form['form[s1]'].value = 1;
                                           }
                                        }
                                     }, false);
@@ -1532,6 +1568,12 @@ function addTableElements(){
 
                if (numcells == 6) {         // resources
                   createExtendedTable(tables[i], 5);
+                  var newCell1 = rows[0].insertCell(4);
+                  newCell1.innerHTML = '<b>Storehouse</b>';
+                  for(var r = 1; r < rows.length; ++r){
+                     var newCell1 = rows[r].insertCell(4);
+                     newCell1.innerHTML = Math.floor(Math.pow(1.2, getValue('Storehouse'+(r-1))) * 1000);
+                  }
                   dataRows[1].width = '5%';
                   dataRows[2].width = '5%';
                   dataRows[3].width = '5%';
@@ -1546,7 +1588,8 @@ function addTableElements(){
                   dataRows[12].width = '5%';
                   dataRows[13].width = '5%';
                   dataRows[14].width = '5%';
-                  cells2sum = [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];  // starting at 0 of course
+                  dataRows[15].width = '5%';
+                  cells2sum = [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];  // starting at 0 of course
                }else if(numcells == 4) {    // fleets & Schedules
                   if(dataRows[1].innerHTML == '<b>Army</b>'){ // fleets
                      createExtendedTable(tables[i], 3);
@@ -1574,8 +1617,11 @@ function addTableElements(){
                      dataRows[7].width = '5%';
                      dataRows[8].width = '5%';
                      dataRows[9].width = '5%';
-                     dataRows[10].width = '1%';
-                     cells2sum = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+                     dataRows[10].width = '5%';
+                     dataRows[11].width = '5%';
+                     dataRows[12].width = '5%';
+                     dataRows[13].width = '1%';
+                     cells2sum = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
                   }
                }
 
@@ -1620,14 +1666,14 @@ function addTableElements(){
                }
 
                if(numcells == 6){      //for visual appearance
-                  newtfootrow.insertCell(4).innerHTML = '';
-                  newtfootrow2.insertCell(4).innerHTML = '';
+                  newtfootrow.insertCell(5).innerHTML = '';
+                  newtfootrow2.insertCell(5).innerHTML = '';
                   for(var r = 1; r < rows.length-2; ++r){
                      setValue('BarBuild'+(r-1), false);
                      setValue('HarBuild'+(r-1), false);
                      setValue('MHBuild'+(r-1),  false);
                      setValue('LabBuild'+(r-1), false);
-                     var buildings = rows[r].getElementsByTagName('td')[4].getElementsByTagName('img');
+                     var buildings = rows[r].getElementsByTagName('td')[5].getElementsByTagName('img');
                      for(var i=0; i<buildings.length; i++){
                         if(buildings[i].src.match(/u_2\.gif/)){
                            setValue('BarBuild'+(r-1), true);
@@ -1758,6 +1804,15 @@ function createExtendedTableSchedule(table, start){
 
    var newCell9 = table.rows[0].insertCell(start+7);
    newCell9.innerHTML = '<b>Colos</b>';
+   
+   var newCell10 = table.rows[0].insertCell(start+8);
+   newCell10.innerHTML = '<b>Gold</b>';
+   
+   var newCell11 = table.rows[0].insertCell(start+9);
+   newCell11.innerHTML = '<b>Stone</b>';
+   
+   var newCell12 = table.rows[0].insertCell(start+10);
+   newCell12.innerHTML = '<b>Lumber</b>';
 
    var rows = table.getElementsByTagName('tr');
 
@@ -1791,6 +1846,15 @@ function createExtendedTableSchedule(table, start){
 
          newCell = table.rows[r].insertCell(start+7);
          newCell.innerHTML = '0/'+getValue('Colonization Ships'+(r-1));
+         
+         newCell = table.rows[r].insertCell(start+8);
+         newCell.innerHTML = '0';
+         
+         newCell = table.rows[r].insertCell(start+9);
+         newCell.innerHTML = '0';
+         
+         newCell = table.rows[r].insertCell(start+10);
+         newCell.innerHTML = '0';
       }else{
          var schedules_array = schedules.split(",");
 
@@ -1819,6 +1883,27 @@ function createExtendedTableSchedule(table, start){
 
          newCell = table.rows[r].insertCell(start+7);
          newCell.innerHTML = '<b>'+schedules_array[8]+'</b>/'+getValue('Colonization Ships'+(r-1));
+         
+         newCell = table.rows[r].insertCell(start+8);
+         newCell.innerHTML = (schedules_array[0]*50)+(schedules_array[1]*80)+
+                             (schedules_array[2]*100)+(schedules_array[3]*5000)+
+                             (schedules_array[4]*900)+(schedules_array[5]*600)+
+                             (schedules_array[6]*450)+(schedules_array[7]*300)+
+                             (schedules_array[8]*35000);
+         
+         newCell = table.rows[r].insertCell(start+9);
+         newCell.innerHTML = (schedules_array[0]*10)+(schedules_array[1]*10)+
+                             (schedules_array[2]*30)+(schedules_array[3]*2500)+
+                             (schedules_array[4]*0)+(schedules_array[5]*0)+
+                             (schedules_array[6]*0)+(schedules_array[7]*0)+
+                             (schedules_array[8]*0);
+         
+         newCell = table.rows[r].insertCell(start+10);
+         newCell.innerHTML = (schedules_array[0]*0)+(schedules_array[1]*30)+
+                             (schedules_array[2]*50)+(schedules_array[3]*4000)+
+                             (schedules_array[4]*900)+(schedules_array[5]*750)+
+                             (schedules_array[6]*300)+(schedules_array[7]*300)+
+                             (schedules_array[8]*30000);
       }
    }
 }
