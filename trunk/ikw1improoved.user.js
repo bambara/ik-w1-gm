@@ -308,7 +308,8 @@ function parseTables(){
                // will not select already seen transports to you, because it assumes
                // you want to keep them otherwise you'd have deleted them yourself
                for (var r = 2; r < rows.length - 1; ++r) { // 2 to skip 'Events' and 'Island' rows, and bottom rows
-                  if (rows[r].getElementsByTagName('td')[1].getElementsByTagName('a')[0].innerHTML == 'Transport to ' + playername) {
+                  var drows = rows[r].getElementsByTagName('td');
+                  if (drows[1] && drows[1].getElementsByTagName('a')[0].innerHTML == 'Transport to ' + playername) {
                      document.getElementById('events').elements[r-1].checked = true;
                   }
                }
@@ -1065,8 +1066,24 @@ function parseMap(){
             var newCe1 = document.createElement('td');
             var newCe2 = document.createElement('td');
             var newCe3 = document.createElement('td');
-            newCe1.innerHTML = alliance;
-            newCe2.innerHTML = alliances[alliance].unique().join(' ; ');
+            if(alliance != 'None'){
+               var al = alliance.substring(1, (alliance.length-1));
+               var oc = document.getElementsByName('pos1')[0].value;
+               var gr = document.getElementsByName('pos2')[0].value;
+               newCe1.innerHTML = "<a href=\"/us/1/index.php?s="+gup('s')+"&p=map&pos1="+oc+"&pos2="+gr+"&zoom=&highlight[type]=alliance&highlight[string]="+al+">"+alliance+"</a>";
+            }else{
+               newCe1.innerHTML = alliance;
+            }
+            var players = alliances[alliance].unique().join(' ; ');
+            players = players.split(';');
+            for(var i=0; i<players.length; i++){
+               var pl = document.createElement('a');
+               pl.setAttribute('href', "/us/1/index.php?s="+gup('s')+"&p=map&pos1="+oc+"&pos2="+gr+"&zoom=&highlight[type]=member&highlight[string]="+players[i]);
+               pl.innerHTML = players[i];
+               var sep = document.createTextNode('; ');
+               newCe2.appendChild(pl);
+               newCe2.appendChild(sep);
+            }
             newCe3.innerHTML = alliances[alliance].length;
             
             newRow.appendChild(newCe1);
@@ -1111,14 +1128,13 @@ function showIslandsScore(){
             var nt = (ot*1)+(t[1]*1);
             var lol = document.createElement('div');
             lol.setAttribute('id', 'ScoreOfIsland');
-            lol.setAttribute('style', "font-family: Silkscreen; font-size:8px;"+
+            lol.setAttribute('style', "font-family: Silkscreen; font-size:10px;"+
                "height:8px; line-height:8px; "+
                "position:absolute;left:"+nl+
                "px;top:"+nt+"px; "+
                "background-color: #FFF");
             lol.innerHTML = s[1]+'<br/>';
-            document.body.appendChild(lol);
-            lol = lol + '<div style=\'font-family: Verdana; font-size:8px; height:8px; line-height:8px; position:absolute;left:'+nl+'px;top:'+nt+'px; background-color: #FFF\'>'+s[1]+'<br/></div>'; 
+            document.body.appendChild(lol); 
             var nl=0; 
             var nt=0;
          }
