@@ -380,19 +380,18 @@ function parseTableCells(){
          var a = oElement.innerHTML.match(/(.+) \(Level (\d+)\)/);
          //var a = oElement.innerHTML.match(/(\w+(?: \w+)?)(?: \(Level (\d+)\))?/);
          if (a) {
-            if (!a[2]) a[2] = 0;
+            goldprod = Math.floor(8 * Math.pow(1.2, parseInt(GM_getValue("Gold Mine"+curIslandCoor, 0))));
+            stoneprod = Math.floor(5 * Math.pow(1.2, parseInt(GM_getValue("Stone Quarry"+curIslandCoor, 0))));
+            woodprod = Math.floor(6 * Math.pow(1.2, parseInt(GM_getValue("Lumber Mill"+curIslandCoor, 0))));
             if (a[1].indexOf("Gold Mine") > -1) {
-               goldprod = Math.floor(8 * Math.pow(1.2, parseInt(a[2])));
                oElement.innerHTML = oElement.innerHTML.replace(/(\(Level \d+\))/, "$1 (Produces " + goldprod + "/h)");
                cells[i+1].innerHTML = cells[i+1].innerHTML + "<br>Next: " + Math.floor(8 * Math.pow(1.2, parseInt(a[2])+1));
             }
             else if (a[1].indexOf("Stone Quarry") > -1) {
-               stoneprod = Math.floor(5 * Math.pow(1.2, parseInt(a[2])));
                oElement.innerHTML = oElement.innerHTML.replace(/(\(Level \d+\))/, "$1 (Produces " + stoneprod + "/h)");
                cells[i+1].innerHTML = cells[i+1].innerHTML + "<br>Next: " + Math.floor(5 * Math.pow(1.2, parseInt(a[2])+1));
             }
             else if (a[1].indexOf("Lumber Mill") > -1) {
-               woodprod = Math.floor(6 * Math.pow(1.2, parseInt(a[2])));
                oElement.innerHTML = oElement.innerHTML.replace(/(\(Level \d+\))/, "$1 (Produces " + woodprod + "/h)");
                cells[i+1].innerHTML = cells[i+1].innerHTML + "<br>Next: " + Math.floor(6 * Math.pow(1.2, parseInt(a[2])+1));
             }
@@ -402,7 +401,7 @@ function parseTableCells(){
                if (!stoneprod) stoneprod = 191;
                if (!woodprod) woodprod = 230;
                
-               var stores = Math.floor(Math.pow(1.2, parseInt(a[2])) * 1000);
+               var stores = Math.floor(Math.pow(1.2, parseInt(GM_getValue("Storehouse"+curIslandCoor, 0))) * 1000);
                cells[i+1].innerHTML = cells[i+1].innerHTML + "<br>Next: " + Math.floor(Math.pow(1.2, parseInt(a[2]) + 1) * 1000);
                goldin = Math.round((stores - gold) * 3600 / goldprod);
                stonein = Math.round((stores - stone) * 3600 / stoneprod);
@@ -421,7 +420,7 @@ function parseTableCells(){
             var msg = "<select onchange=\"if (this.value.length > 0) { var coords=this.value.match(/(\\d+):(\\d+):(\\d+)/); document.getElementsByName('form[pos1]')[0].value = coords[1]; document.getElementsByName('form[pos2]')[0].value = coords[2]; document.getElementsByName('form[pos3]')[0].value = coords[3];}\">";
             msg += "<option value''>Island of destination</option>";
             for (i=0;i<GM_getValue('numIslands');i++) {
-               var name = getValue('Name', i);
+               var name = GM_getValue(playername+'Name'+i);
                var split = name.match(/(.+)\((.+)\)/);
                var isle = split[1];
                var coords = split[2];
@@ -1551,7 +1550,7 @@ function addTableElements(){
                   var coords = rows[r].getElementsByTagName('td')[0].getElementsByTagName('a')[0].innerHTML.match(/(.+)\((.+)\)/);
                   IslandsCoords.push(coords[2]);
                   setValue('href', (r-1), rows[r].getElementsByTagName('td')[0].getElementsByTagName('a')[0].href);
-                  setValue('Name', (r-1), coords[1]);
+                  GM_setValue(playername+'Name'+(r-1), coords[0]);
                }
                
                addUpdateSection();
