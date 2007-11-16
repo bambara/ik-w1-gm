@@ -419,8 +419,8 @@ function parseTableCells(){
          else if (oElement.innerHTML == '<b>Island of destination</b>') {
             var msg = "<select onchange=\"if (this.value.length > 0) { var coords=this.value.match(/(\\d+):(\\d+):(\\d+)/); document.getElementsByName('form[pos1]')[0].value = coords[1]; document.getElementsByName('form[pos2]')[0].value = coords[2]; document.getElementsByName('form[pos3]')[0].value = coords[3];}\">";
             msg += "<option value''>Island of destination</option>";
-            for (i=0;i<GM_getValue('numIslands');i++) {
-               var name = GM_getValue(playername+'Name'+i);
+            for (i=0;i<getPlayerValue('numIslands');i++) {
+               var name = getValue('Name', i);
                var split = name.match(/(.+)\((.+)\)/);
                var isle = split[1];
                var coords = split[2];
@@ -974,11 +974,12 @@ function parseMap(){
          var score = areas[i].title.match(/Score: (.*)/);
          if (island) {
             if (!ruler) { // als geen ruler, dan is het rulerless
-               var msg = '<a href="' + areas[i].href + '">' + island[1] + "</a>";
-               if (score != 1) { msg += ' (' + score[1] + ')'; } // score
+               var msg = document.createElement('a');
+               msg.href = areas[i].href;
+               msg.innerHTML = island[1];
+               if (score != 1) { msg.innerHTML += ' (' + score[1] + ')'; } // score
                unruled.push(msg);
-            }
-            else {
+            }else{
                var alli = (alliance?alliance[1]:'None');
                if (!alliances[alli]) { alliances[alli] = new Array(); };
                alliances[alli].push(ruler[1]); // ruler name
@@ -1011,7 +1012,7 @@ function parseMap(){
       var newCell2 = document.createElement('td');
       newCell2.innerHTML = '<b>Members</b>';
       var newCell3 = document.createElement('td');
-      newCell3.innerHTML = '<b># Islands</b>';
+      newCell3.innerHTML = '<b>#Islands</b>';
       
       newRow1.appendChild(newCell1);
       newRow1.appendChild(newCell2);
@@ -1056,7 +1057,6 @@ function parseMap(){
       var br = document.createElement('br');
       var b = document.createElement('b');
       var text3 = document.createTextNode('Unruled islands:');
-      var text4 = document.createTextNode(unruled.join(', '));
       b.appendChild(text3);
       
       newDiv.appendChild(checkbox);
@@ -1065,7 +1065,12 @@ function parseMap(){
       newDiv.appendChild(newTable);
       newDiv.appendChild(br);
       newDiv.appendChild(b);
-      newDiv.appendChild(text4);
+      newDiv.appendChild(document.createElement('br'));
+      newDiv.appendChild(document.createElement('br'));
+      for(var i=0; i<unruled.length; i++){
+         newDiv.appendChild(unruled[i]);
+         if(i != (unruled.length-1)) newDiv.appendChild(document.createTextNode(', '));
+      }
       
       addGlobalStyle('.mapinfo { float:right;width:35%;}');
       document.body.insertBefore(newDiv, document.getElementsByTagName('br')[1]);
@@ -1178,20 +1183,20 @@ function addUpdateSection(){
    
    var sep2 = document.createTextNode(' | ');
    
-   var dat = document.createTextNode(GM_getValue('updatedate', new Date().toLocaleString()));
+   var dat = document.createTextNode(getPlayerValue('updatedate', new Date().toLocaleString()));
    
    var sep3 = document.createTextNode(' | ');
    
    var BCheckbox = document.createElement('input');
    BCheckbox.type = 'checkbox';
    BCheckbox.id = 'getBData';
-   BCheckbox.defaultChecked = GM_getValue('getBData');
+   BCheckbox.defaultChecked = getPlayerValue('getBData');
    BCheckbox.addEventListener("click", 
       function(){ 
          if(document.getElementById('getBData').checked){
-            GM_setValue('getBData', true);
+            setPlayerValue('getBData', true);
          }else{
-            GM_setValue('getBData', false);
+            setPlayerValue('getBData', false);
          }
       }, true);
    
@@ -1264,7 +1269,7 @@ function parseURL(iteration, sudIteration, isleNum){
       theURL = theURL.replace(gup('p'), 'b5');
       break;
    }
-   if(isleNum < GM_getValue('numIslands')){
+   if(isleNum < getPlayerValue('numIslands')){
       GM_xmlhttpRequest({
             method: 'GET',
             url: theURL,
@@ -1288,7 +1293,7 @@ function parseURL(iteration, sudIteration, isleNum){
                }else{
                   switch (iteration) {
                   case 0:
-                     document.getElementById('islandtext').innerHTML = "Loading : "+IslandsCoords[isleNum];
+                     document.getElementById('islandtext').innerHTML = "Loading : "+getIsCoords(isleNum);
                      parseURLResult(responseDetails.responseText, isleNum);
                      if(document.getElementById('getBData').checked){
                         parseURL( 1, -1, isleNum); //Parse Harbour page!
@@ -1297,7 +1302,7 @@ function parseURL(iteration, sudIteration, isleNum){
                      }
                      break;
                   case 1:
-                     document.getElementById('islandtext').innerHTML = "Loading : "+IslandsCoords[isleNum]+" -> Harbour";
+                     document.getElementById('islandtext').innerHTML = "Loading : "+getIsCoords(isleNum)+" -> Harbour";
                      if(sudIteration == -1){
                         var s = responseDetails.responseText;
                         var Rx= /&p=b7&sub=show&id\=([0-9]*)/g;
@@ -1342,7 +1347,7 @@ function parseURL(iteration, sudIteration, isleNum){
                      }
                      break;
                   case 2:        // MH Page
-                     document.getElementById('islandtext').innerHTML = "Loading : "+IslandsCoords[isleNum]+" -> Main House";
+                     document.getElementById('islandtext').innerHTML = "Loading : "+getIsCoords(isleNum)+" -> Main House";
                      var s = responseDetails.responseText;
                      var orders = s.match(/Build: (.+?)</);
                      if(orders) setValue('MHOrders', isleNum, 'Building : '+orders[1]);
@@ -1355,7 +1360,7 @@ function parseURL(iteration, sudIteration, isleNum){
                      }
                      break;
                   case 3:        // Barracks Page
-                     document.getElementById('islandtext').innerHTML = "Loading : "+IslandsCoords[isleNum]+" -> Barracks";
+                     document.getElementById('islandtext').innerHTML = "Loading : "+getIsCoords(isleNum)+" -> Barracks";
                      var s = responseDetails.responseText;
                      var orders = s.match(/All orders: (.+?)</);
                      if(orders) setValue('BarOrders', isleNum, 'Orders : '+orders[1]);
@@ -1366,7 +1371,7 @@ function parseURL(iteration, sudIteration, isleNum){
                      }
                      break;
                   case 4:        // Lab Page
-                     document.getElementById('islandtext').innerHTML = "Loading : "+IslandsCoords[isleNum]+" -> Laboratory";
+                     document.getElementById('islandtext').innerHTML = "Loading : "+getIsCoords(isleNum)+" -> Laboratory";
                      var s = responseDetails.responseText;
                      setValue('LabOrders', isleNum, '');
                      var orders = s.match(/Research: (.+?)</);
@@ -1387,9 +1392,9 @@ function parseURL(iteration, sudIteration, isleNum){
             }
       }); //end xmlrequest
    }else{
-      GM_setValue('updatedate', new Date().toLocaleString());
+      setPlayerValue('updatedate', new Date().toLocaleString());
       document.getElementById('islandtext').innerHTML = "Done!!!";
-      document.getElementById('updatedate').innerHTML = GM_getValue('updatedate');
+      document.getElementById('updatedate').innerHTML = getPlayerValue('updatedate');
       location.reload(true);
    }
 }
@@ -1530,39 +1535,44 @@ function parseHarbourEvents(s, isle){
 function addTableElements(){
    
    var tables = document.getElementsByTagName('table');
-   for ( var i = 0; i < tables.length; i++) {
-      if (tables[i].className == 'table') { // list page, alliance pages, random island page
-         var rows = tables[i].getElementsByTagName('tr');
-         // on lab page a table can have 0 rows (probably research table after research is all done)
-         if (rows.length > 0) {
-            var dataRows = rows[0].getElementsByTagName('td');
-            var numcells = dataRows.length;  // 6 for resources, 4 for fleet, 3 for alliance pages
-            // add a row with totals
+   if (tables[1] && tables[1].className == 'table') { // list page, alliance pages, random island page
+      var rows = tables[1].getElementsByTagName('tr');
+      // on lab page a table can have 0 rows (probably research table after research is all done)
+      if (rows.length > 0) {
+         var dataRows = rows[0].getElementsByTagName('td');
+         var numcells = dataRows.length;  // 6 for resources, 4 for fleet, 3 for alliance pages
+         // add a row with totals
+         
+         if (dataRows[0].innerHTML == '<b>Island</b>' && numcells > 1 && dataRows[numcells-1].width == '1%') { // list page only
+            setPlayerValue('numIslands', rows.length-1);
+            // make table a bit wider
+            dataRows[numcells-1].width = '1px';
+            tables[1].style.width = '100%';
+            var cells2sum;
             
-            if (dataRows[0].innerHTML == '<b>Island</b>' && numcells > 1 && dataRows[numcells-1].width == '1%') { // list page only
-               GM_setValue('numIslands', rows.length-1);
-               // make table a bit wider
-               dataRows[numcells-1].width = '1px';
-               tables[i].style.width = '100%';
-               var cells2sum;
-               
-               for(var r = 1; r < rows.length; ++r){
-                  var coords = rows[r].getElementsByTagName('td')[0].getElementsByTagName('a')[0].innerHTML.match(/(.+)\((.+)\)/);
-                  IslandsCoords.push(coords[2]);
-                  setValue('href', (r-1), rows[r].getElementsByTagName('td')[0].getElementsByTagName('a')[0].href);
-                  GM_setValue(playername+'Name'+(r-1), coords[0]);
-               }
-               
-               addUpdateSection();
-               
-               if (numcells == 6) {         // resources
-                  createExtendedTable(tables[i], 5);
-                  var newCell1 = rows[0].insertCell(4);
-                  newCell1.innerHTML = '<b>Storehouse</b>';
-                  for(var r = 1; r < rows.length; ++r){
-                     var newCell1 = rows[r].insertCell(4);
-                     newCell1.innerHTML = Math.floor(Math.pow(1.2, getValue('Storehouse', (r-1))) * 1000);
-                  }
+            addUpdateSection();
+            
+            if (numcells == 6) {         // resources
+               createExtendedTable(tables[1], 5);
+               dataRows[1].width = '5%';
+               dataRows[2].width = '5%';
+               dataRows[3].width = '5%';
+               dataRows[4].width = '5%';
+               dataRows[5].width = '5%';
+               dataRows[6].width = '5%';
+               dataRows[7].width = '5%';
+               dataRows[8].width = '5%';
+               dataRows[9].width = '5%';
+               dataRows[10].width = '5%';
+               dataRows[11].width = '5%';
+               dataRows[12].width = '5%';
+               dataRows[13].width = '5%';
+               dataRows[14].width = '5%';
+               dataRows[15].width = '5%';
+               cells2sum = [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];  // starting at 0 of course
+            }else if(numcells == 4) {    // fleets & Schedules
+               if(dataRows[1].innerHTML == '<b>Army</b>'){ // fleets
+                  createExtendedTableArmy(tables[1], 3);
                   dataRows[1].width = '5%';
                   dataRows[2].width = '5%';
                   dataRows[3].width = '5%';
@@ -1575,126 +1585,192 @@ function addTableElements(){
                   dataRows[10].width = '5%';
                   dataRows[11].width = '5%';
                   dataRows[12].width = '5%';
-                  dataRows[13].width = '5%';
-                  dataRows[14].width = '5%';
-                  dataRows[15].width = '5%';
-                  cells2sum = [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];  // starting at 0 of course
-               }else if(numcells == 4) {    // fleets & Schedules
-                  if(dataRows[1].innerHTML == '<b>Army</b>'){ // fleets
-                     createExtendedTable(tables[i], 3);
-                     dataRows[1].width = '5%';
-                     dataRows[2].width = '5%';
-                     dataRows[3].width = '5%';
-                     dataRows[4].width = '5%';
-                     dataRows[5].width = '5%';
-                     dataRows[6].width = '5%';
-                     dataRows[7].width = '5%';
-                     dataRows[8].width = '5%';
-                     dataRows[9].width = '5%';
-                     dataRows[10].width = '5%';
-                     dataRows[11].width = '5%';
-                     dataRows[12].width = '5%';
-                     cells2sum = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-                  }else{                               // Schedules
-                     createExtendedTableSchedule(tables[i], 2)
-                     dataRows[1].width = '5%';
-                     dataRows[2].width = '5%';
-                     dataRows[3].width = '5%';
-                     dataRows[4].width = '5%';
-                     dataRows[5].width = '5%';
-                     dataRows[6].width = '5%';
-                     dataRows[7].width = '5%';
-                     dataRows[8].width = '5%';
-                     dataRows[9].width = '5%';
-                     dataRows[10].width = '5%';
-                     dataRows[11].width = '5%';
-                     dataRows[12].width = '5%';
-                     dataRows[13].width = '1%';
-                     cells2sum = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-                  }
+                  cells2sum = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+               }else{                               // Schedules
+                  createExtendedTableSchedule(tables[1], 2)
+                  dataRows[1].width = '5%';
+                  dataRows[2].width = '5%';
+                  dataRows[3].width = '5%';
+                  dataRows[4].width = '5%';
+                  dataRows[5].width = '5%';
+                  dataRows[6].width = '5%';
+                  dataRows[7].width = '5%';
+                  dataRows[8].width = '5%';
+                  dataRows[9].width = '5%';
+                  dataRows[10].width = '5%';
+                  dataRows[11].width = '5%';
+                  dataRows[12].width = '5%';
+                  dataRows[13].width = '1%';
+                  cells2sum = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
                }
-               
-               var totalsisles = new Array();
-               var averageisles = new Array();
-               
-               for (var k = 0; k < cells2sum.length; ++k) { // boring init
-                  totalsisles[k] = 0;
+            }
+            
+            var totalsisles = new Array();
+            var averageisles = new Array();
+            
+            for (var k = 0; k < cells2sum.length; ++k) { // boring init
+               totalsisles[k] = 0;
+            }
+            
+            for (var k = 0; k < cells2sum.length; ++k) { // boring init
+               averageisles[k] = 0;
+            }
+            
+            for (var r = 1; r < rows.length; ++r) {
+               for (var k = 0; k < cells2sum.length; ++k) {
+                  var childs = rows[r].getElementsByTagName('td');
+                  totalsisles[k] += parseInt(childs[cells2sum[k]].textContent);
                }
-               
-               for (var k = 0; k < cells2sum.length; ++k) { // boring init
-                  averageisles[k] = 0;
+            }
+            
+            for (var r = 1; r < rows.length; ++r) {
+               for (var k = 0; k < cells2sum.length; ++k) {
+                  averageisles[k] = Math.round(totalsisles[k]/getPlayerValue('numIslands'));
                }
-               
-               for (var r = 1; r < rows.length; ++r) {
-                  for (var k = 0; k < cells2sum.length; ++k) {
-                     var childs = rows[r].getElementsByTagName('td');
-                     totalsisles[k] += parseInt(childs[cells2sum[k]].textContent);
-                  }
-               }
-               
-               for (var r = 1; r < rows.length; ++r) {
-                  for (var k = 0; k < cells2sum.length; ++k) {
-                     averageisles[k] = Math.round(totalsisles[k]/GM_getValue('numIslands'));
-                  }
-               }
-               
-               var newtfoot2 = tables[i].createTFoot(); //Create new tfoot
-               var newtfootrow2 = newtfoot2.insertRow(0); //Define a new row for the tfoot
-               newtfootrow2.insertCell(0).innerHTML = "<b>Average/Island :</b>"; //Define a new cell for the tfoot's row
-               
-               for (var r = 0; r < totalsisles.length; ++r) {
-                  newtfootrow2.insertCell(r+1).innerHTML = averageisles[r];
-               }
-               
-               var newtfoot = tables[i].createTFoot(); //Create new tfoot
-               var newtfootrow = newtfoot.insertRow(0); //Define a new row for the tfoot
-               newtfootrow.insertCell(0).innerHTML = "<b>Totals :</b>"; //Define a new cell for the tfoot's row
-               
-               for (var r = 0; r < totalsisles.length; ++r) {
-                  newtfootrow.insertCell(r+1).innerHTML = totalsisles[r];
-               }
-               
-               if(numcells == 6){      //for visual appearance
-                  newtfootrow.insertCell(5).innerHTML = '';
-                  newtfootrow2.insertCell(5).innerHTML = '';
-                  for(var r = 1; r < rows.length-2; ++r){
-                     setValue('BarBuild', (r-1), false);
-                     setValue('HarBuild', (r-1), false);
-                     setValue('MHBuild', (r-1),  false);
-                     setValue('LabBuild', (r-1), false);
-                     var buildings = rows[r].getElementsByTagName('td')[5].getElementsByTagName('img');
-                     for(var i=0; i<buildings.length; i++){
-                        if(buildings[i].src.match(/u_2\.gif/)){
-                           setValue('BarBuild', (r-1), true);
-                           buildings[i].title = getValue('BarOrders', (r-1));
-                        }
-                        if(buildings[i].src.match(/s_2\.gif/)){
-                           setValue('HarBuild', (r-1), true);
-                           buildings[i].title = getValue('HarOrders', (r-1));
-                        }
-                        if(buildings[i].src.match(/b_2\.gif/)){
-                           setValue('MHBuild', (r-1), true);
-                           buildings[i].title = getValue('MHOrders', (r-1));
-                        }
-                        if(buildings[i].src.match(/t_2\.gif/)){
-                           setValue('LabBuild', (r-1), true);
-                           buildings[i].title = getValue('LabOrders', (r-1));
-                        }
-                     }
-                  }
-               }
-               
-               for (var r = totalsisles.length + 1; r < numcells; ++r) {
-                  newtfootrow.insertCell(r); // visual appearance
-                  newtfootrow2.insertCell(r); // visual appearance
-               }
+            }
+            
+            var newtfoot2 = tables[1].createTFoot(); //Create new tfoot
+            var newtfootrow2 = newtfoot2.insertRow(0); //Define a new row for the tfoot
+            newtfootrow2.insertCell(0).innerHTML = "<b>Average/Island :</b>"; //Define a new cell for the tfoot's row
+            
+            for (var r = 0; r < totalsisles.length; ++r) {
+               newtfootrow2.insertCell(r+1).innerHTML = averageisles[r];
+            }
+            
+            var newtfoot = tables[1].createTFoot(); //Create new tfoot
+            var newtfootrow = newtfoot.insertRow(0); //Define a new row for the tfoot
+            newtfootrow.insertCell(0).innerHTML = "<b>Totals :</b>"; //Define a new cell for the tfoot's row
+            
+            for (var r = 0; r < totalsisles.length; ++r) {
+               newtfootrow.insertCell(r+1).innerHTML = totalsisles[r];
+            }
+            
+            if(numcells == 6){      //for visual appearance
+               newtfootrow.insertCell(5).innerHTML = '';
+               newtfootrow2.insertCell(5).innerHTML = '';
             }
          }
       }
    }
 }
 
+function addTipToLink(row, r){
+   var theIsLink = row.getElementsByTagName('td')[0].getElementsByTagName('a')[0]
+   var coords = theIsLink.innerHTML.match(/(.+)\((.+)\)/);
+   setIsCoords((r-1), coords[2]);
+   setValue('href', (r-1), theIsLink.href);
+   setValue('Name', (r-1), coords[0]);
+   
+   if(getPlayerValue('getBData')){     //To have the advanced tooltip
+      theIsLink.addEventListener("mouseover",
+         function(e){showIsTip(this, e);}
+         ,false);
+      theIsLink.addEventListener("mouseout",
+         function(){hideIsTip(this);}
+         ,false);
+      createIsTip(coords[2], (r-1));
+   }
+}
 function createExtendedTable(table, start){
+   
+   var newCell11 = table.rows[0].insertCell(start-1);
+   newCell11.innerHTML = '<b>Storehouse</b>';
+   
+   var newCell1 = table.rows[0].insertCell(start+1);
+   newCell1.innerHTML = '<b>Stoners</b>';
+   
+   var newCell2 = table.rows[0].insertCell(start+2);
+   newCell2.innerHTML = '<b>Spears</b>';
+   
+   var newCell3 = table.rows[0].insertCell(start+3);
+   newCell3.innerHTML = '<b>Archers</b>';
+   
+   var newCell4 = table.rows[0].insertCell(start+4);
+   newCell4.innerHTML = '<b>Cats</b>';
+   
+   var newCell5 = table.rows[0].insertCell(start+5);
+   newCell5.innerHTML = '<b>LWS</b>';
+   
+   var newCell6 = table.rows[0].insertCell(start+6);
+   newCell6.innerHTML = '<b>LMS</b>';
+   
+   var newCell7 = table.rows[0].insertCell(start+7);
+   newCell7.innerHTML = '<b>SWS</b>';
+   
+   var newCell8 = table.rows[0].insertCell(start+8);
+   newCell8.innerHTML = '<b>SMS</b>';
+   
+   var newCell9 = table.rows[0].insertCell(start+9);
+   newCell9.innerHTML = '<b>Colos</b>';
+   
+   var newCell10 = table.rows[0].insertCell(start+10);
+   newCell10.innerHTML = '<b>Score</b>';
+   
+   var rows = table.getElementsByTagName('tr');
+   
+   for (var r = 1; r < rows.length; ++r) {
+      addTipToLink(rows[r], r);
+      
+      setValue('BarBuild', (r-1), false);
+      setValue('HarBuild', (r-1), false);
+      setValue('MHBuild', (r-1),  false);
+      setValue('LabBuild', (r-1), false);
+      var buildings = rows[r].getElementsByTagName('td')[4].getElementsByTagName('img');
+      for(var i=0; i<buildings.length; i++){
+         if(buildings[i].src.match(/u_2\.gif/)){
+            setValue('BarBuild', (r-1), true);
+            buildings[i].title = getValue('BarOrders', (r-1));
+         }
+         if(buildings[i].src.match(/s_2\.gif/)){
+            setValue('HarBuild', (r-1), true);
+            buildings[i].title = getValue('HarOrders', (r-1));
+         }
+         if(buildings[i].src.match(/b_2\.gif/)){
+            setValue('MHBuild', (r-1), true);
+            buildings[i].title = getValue('MHOrders', (r-1));
+         }
+         if(buildings[i].src.match(/t_2\.gif/)){
+            setValue('LabBuild', (r-1), true);
+            buildings[i].title = getValue('LabOrders', (r-1));
+         }
+      }
+      
+      newCell = table.rows[r].insertCell(start-1);
+      newCell.innerHTML = Math.floor(Math.pow(1.2, getValue('Storehouse', (r-1))) * 1000);
+      
+      newCell = table.rows[r].insertCell(start+1);
+      newCell.innerHTML = getValue('Stone Throwers', (r-1));
+      
+      newCell = table.rows[r].insertCell(start+2);
+      newCell.innerHTML = getValue('Spearfighters', (r-1));
+      
+      newCell = table.rows[r].insertCell(start+3);
+      newCell.innerHTML = getValue('Archers', (r-1));
+      
+      newCell = table.rows[r].insertCell(start+4);
+      newCell.innerHTML = getValue('Catapults', (r-1));
+      
+      newCell = table.rows[r].insertCell(start+5);
+      newCell.innerHTML = getValue('Large Warships', (r-1));
+      
+      newCell = table.rows[r].insertCell(start+6);
+      newCell.innerHTML = getValue('Large Merchant Ships', (r-1));
+      
+      newCell = table.rows[r].insertCell(start+7);
+      newCell.innerHTML = getValue('Small Warships', (r-1));
+      
+      newCell = table.rows[r].insertCell(start+8);
+      newCell.innerHTML = getValue('Small Merchant Ships', (r-1));
+      
+      newCell = table.rows[r].insertCell(start+9);
+      newCell.innerHTML = getValue('Colonization Ships', (r-1));
+      
+      newCell = table.rows[r].insertCell(start+10);
+      newCell.innerHTML = getValue('Score', (r-1));
+   }
+}
+
+function createExtendedTableArmy(table, start){
    
    var newCell1 = table.rows[0].insertCell(start);
    newCell1.innerHTML = '<b>Stoners</b>';
@@ -1729,6 +1805,8 @@ function createExtendedTable(table, start){
    var rows = table.getElementsByTagName('tr');
    
    for (var r = 1; r < rows.length; ++r) {
+      addTipToLink(rows[r], r);
+      
       newCell = table.rows[r].insertCell(start);
       newCell.innerHTML = getValue('Stone Throwers', (r-1));
       
@@ -1801,6 +1879,7 @@ function createExtendedTableSchedule(table, start){
    var rows = table.getElementsByTagName('tr');
    
    for (var r = 1; r < rows.length; ++r) {
+      addTipToLink(rows[r], r);
       
       var schedules = table.rows[r].getElementsByTagName('td')[1].innerHTML;
       
@@ -1892,20 +1971,183 @@ function createExtendedTableSchedule(table, start){
    }
 }
 
+function showIsTip(current,e){
+   var coords = current.innerHTML.match(/(.+)\((.+)\)/);
+   var theID = coords[2];
+   var tooltip = document.getElementById(theID);
+   if(tooltip){
+      var x = xstooltip_findPosX(current);
+      var y = xstooltip_findPosY(current);
+      tooltip.style.left=(x+current.offsetWidth)+'px';
+      tooltip.style.top=(y-(tooltip.offsetHeight/3))+'px';
+      tooltip.style.visibility='visible';
+   }
+}
+
+function hideIsTip(current){
+   var coords = current.innerHTML.match(/(.+)\((.+)\)/);
+   var theID = coords[2];
+   var tooltip = document.getElementById(theID);
+   if(tooltip) tooltip.style.visibility='hidden';
+}
+
+function xstooltip_findPosX(obj){
+   var curleft = 0;
+   if (obj.offsetParent) {
+      while (obj.offsetParent){
+         curleft += obj.offsetLeft
+         obj = obj.offsetParent;
+      }
+   }
+   else if (obj.x)
+      curleft += obj.x;
+   return curleft;
+}
+
+function xstooltip_findPosY(obj){
+   var curtop = 0;
+   if (obj.offsetParent) {
+      while (obj.offsetParent){
+         curtop += obj.offsetTop
+         obj = obj.offsetParent;
+      }
+   }
+   else if (obj.y)
+      curtop += obj.y;
+   return curtop;
+}
+
+function createIsTip(theID, isleNum){
+   var theDiv = document.createElement('div');
+   theDiv.id = theID;
+   theDiv.style.position='absolute';
+   theDiv.style.background='#FFFFCC';
+   theDiv.style.visibility='hidden';
+   theDiv.style.border='2px outset #666666';
+   
+   bIsle = document.createElement('b');
+   bIsle.appendChild(document.createTextNode('Island: '+getValue('Name', isleNum)));
+   
+   bBuil = document.createElement('b');
+   bBuil.appendChild(document.createTextNode('Buildings'));
+   
+   mhImg = document.createElement('img');
+   mhImg.setAttribute('src', 'http://80.237.203.111/us/public/b1.gif');
+   
+   gmImg = document.createElement('img');
+   gmImg.setAttribute('src', 'http://80.237.203.111/us/public/b2.gif');
+   
+   sqImg = document.createElement('img');
+   sqImg.setAttribute('src', 'http://80.237.203.111/us/public/b3.gif');
+   
+   lmImg = document.createElement('img');
+   lmImg.setAttribute('src', 'http://80.237.203.111/us/public/b4.gif');
+   
+   labImg = document.createElement('img');
+   labImg.setAttribute('src', 'http://80.237.203.111/us/public/b5.gif');
+   
+   barImg = document.createElement('img');
+   barImg.setAttribute('src', 'http://80.237.203.111/us/public/b6.gif');
+   
+   harImg = document.createElement('img');
+   harImg.setAttribute('src', 'http://80.237.203.111/us/public/b7.gif');
+   
+   stImg = document.createElement('img');
+   stImg.setAttribute('src', 'http://80.237.203.111/us/public/b8.gif');
+   
+   swImg = document.createElement('img');
+   swImg.setAttribute('src', 'http://80.237.203.111/us/public/b9.gif');
+   
+   wtImg = document.createElement('img');
+   wtImg.setAttribute('src', 'http://80.237.203.111/us/public/b10.gif');
+   
+   theDiv.appendChild(bIsle);
+   theDiv.appendChild(document.createElement('br'));
+   
+   theDiv.appendChild(bBuil);
+   theDiv.appendChild(document.createElement('br'));
+   
+   theDiv.appendChild(mhImg);
+   theDiv.appendChild(document.createTextNode('Main House (Level '+getValue('Main House', isleNum)+')'));
+   theDiv.appendChild(document.createElement('br'));
+   
+   theDiv.appendChild(gmImg);
+   theDiv.appendChild(document.createTextNode('Gold Mine (Level '+getValue('Gold Mine', isleNum)+')'));
+   theDiv.appendChild(document.createElement('br'));
+   
+   theDiv.appendChild(sqImg);
+   theDiv.appendChild(document.createTextNode('Stone Quarry (Level '+getValue('Stone Quarry', isleNum)+')'));
+   theDiv.appendChild(document.createElement('br'));
+   
+   theDiv.appendChild(lmImg);
+   theDiv.appendChild(document.createTextNode('Lumber Mill (Level '+getValue('Lumber Mill', isleNum)+')'));
+   theDiv.appendChild(document.createElement('br'));
+   
+   theDiv.appendChild(labImg);
+   theDiv.appendChild(document.createTextNode('Laboratory (Level '+getValue('Laboratory', isleNum)+')'));
+   theDiv.appendChild(document.createElement('br'));
+   
+   theDiv.appendChild(barImg);
+   theDiv.appendChild(document.createTextNode('Barracks (Level '+getValue('Barracks', isleNum)+')'));
+   theDiv.appendChild(document.createElement('br'));
+   
+   theDiv.appendChild(harImg);
+   theDiv.appendChild(document.createTextNode('Harbour (Level '+getValue('Harbour', isleNum)+')'));
+   theDiv.appendChild(document.createElement('br'));
+   
+   theDiv.appendChild(stImg);
+   theDiv.appendChild(document.createTextNode('Storehouse (Level '+getValue('Storehouse', isleNum)+')'));
+   theDiv.appendChild(document.createElement('br'));
+   
+   theDiv.appendChild(swImg);
+   theDiv.appendChild(document.createTextNode('Stone Wall (Level '+getValue('Stone Wall', isleNum)+')'));
+   theDiv.appendChild(document.createElement('br'));
+   
+   theDiv.appendChild(wtImg);
+   theDiv.appendChild(document.createTextNode('Watch-Tower (Level '+getValue('Watch-Tower', isleNum)+')'));
+   theDiv.appendChild(document.createElement('br'));
+   
+   document.body.appendChild(theDiv);
+}
+
 /*
 * Some wrapper functions
 */
 
 function setValue(name, isleNum, value) {
    if (value == undefined || value == null) {
-      GM_setValue(name+IslandsCoords[isleNum], "");
+      GM_setValue(name+getIsCoords(isleNum), "");
    } else {
-      GM_setValue(name+IslandsCoords[isleNum], value);
+      GM_setValue(name+getIsCoords(isleNum), value);
+   }
+}
+
+function setIsCoords(isleNum, value) {
+   if (value == undefined || value == null) {
+      GM_setValue(playername+'Island'+isleNum, "");
+   } else {
+      GM_setValue(playername+'Island'+isleNum, value);
+   }
+}
+
+function setPlayerValue(name, value){
+   if (value == undefined || value == null) {
+      GM_setValue(playername+name, "");
+   } else {
+      GM_setValue(playername+name, value);
    }
 }
 
 function getValue(unit, isleNum) {
-   return GM_getValue(unit+IslandsCoords[isleNum], 0);
+   return GM_getValue(unit+getIsCoords(isleNum), 0);
+}
+
+function getIsCoords(isleNum){
+   return GM_getValue(playername+'Island'+isleNum);
+}
+
+function getPlayerValue(unit){
+   return GM_getValue(playername+unit, 0);
 }
 
 function calculate_score(theIsland)
@@ -1936,8 +2178,6 @@ function calculate_score(theIsland)
 var playername = '';
 
 var curIslandCoor = '';
-
-var IslandsCoords = new Array();
 
 var startStoreClock = false;
 var gold, stone, wood;
@@ -1981,6 +2221,6 @@ imtitles['wood.gif'] = 'Lumber';
 init();
 
 /*if (window.addEventListener){
-window.addEventListener("load", init, false) //invoke function
+   window.addEventListener("load", init, false) //invoke function
 }*/
 
