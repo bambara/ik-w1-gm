@@ -1,4 +1,4 @@
-#How to install the script
+How to install the script
 
 = Introduction =
 
