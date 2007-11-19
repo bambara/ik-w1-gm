@@ -1,4 +1,4 @@
-#Features of the script
+Features of the script
 = Introduction =
 
 List of features
