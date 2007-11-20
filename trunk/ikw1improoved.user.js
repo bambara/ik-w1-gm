@@ -204,7 +204,6 @@ function hideElement(name) {
 }
 
 function parseTables(){
-   var tables = document.getElementsByTagName('table');
    for ( var i = 0; i < tables.length; i++) {
       if (tables[i].className == 'table') { // list page, alliance pages, random island page
          var rows = tables[i].getElementsByTagName('tr');
@@ -215,7 +214,7 @@ function parseTables(){
             if (dataRows[0].innerHTML == '<b>New order</b>') { // harbour page, orders
                // preparation to show how much units and resources you can ship
                var newrow = tables[i].insertRow(rows.length - 1);
-               tables[i].style.width = '45%';
+               tables[i].style.width = '800px';
                newrow.insertCell(0).innerHTML = "Units: <span id='orders_units'>0</span> Resources: <span id='orders_res'>0</span>";
                newrow.insertCell(1); // visuals
             }
@@ -276,7 +275,7 @@ function parseTables(){
             }
             else if (dataRows[0].innerHTML == '<b>Your fleets</b>') { // harbour page, orders
                // preparation to show how much units and resources you can ship
-               tables[i].style.width = '45%';
+               tables[i].style.width = '800px';
                dataRows[0].setAttribute('colspan', '3');
                var newT = rows[1].insertCell(0);
                newT.innerHTML = '';
@@ -322,13 +321,9 @@ function parseTables(){
    
 }
 
-var cells = 0;
-
 function parseTableCells(){
-   cells = document.getElementsByTagName('td');
-   
    for( var i = 0, oElement, cellcount = 0; oElement = cells[i]; ++i ) {
-      var a = oElement.innerHTML.match(/\>.+?\>(.+?)\(Level (\d+)\).*Gold:\s+(\d+)\s+Stone:\s+(\d+)\s+Lumber:\s+(\d+)\s+Duration:\s+(\d+:\d+:\d+)/i);
+      var a = oElement.innerHTML.match(/\>(.+?)\(Level (\d+)\).*Gold:\s+(\d+)\s+Stone:\s+(\d+)\s+Lumber:\s+(\d+)\s+Duration:\s+(\d+:\d+:\d+)/i);
       if(!a){
          var b = oElement.innerHTML.match(/\>.+?\>(.+?)\<.*Gold:\s+(\d+)\s+Stone:\s+(\d+)\s+Lumber:\s+(\d+)\s+Duration:\s+(\d+:\d+:\d+)/i);
       }
@@ -467,8 +462,8 @@ function parseTableCells(){
                newText += lines[r];
             }
          }
-         cells[i - 1].innerHTML = newText; //End of red
-         cells[i - 1].innerHTML = cells[i - 1].innerHTML + needed;
+         cells[i-1].innerHTML = newText; //End of red
+         cells[i-1].innerHTML = cells[i-1].innerHTML + needed;
          new newClock( timer, document.getElementById("upgr" + i), longestwait );
       }
    }
@@ -541,9 +536,7 @@ function keyupEventTextInput(){
    document.getElementById(r + 'needed').innerHTML = myneeded;
 }
 
-function parseIn(){
-   var inputs = document.getElementsByTagName('input');
-   
+function parseIn(){   
    for (var i = 0, oElement, numbercounter = 0, hiddenrower = -1, fleet = new Object, units = new Array(); oElement = inputs[i]; ++i) {
       //alert(oElement.type);
       if (oElement.type == 'text') {
@@ -769,8 +762,6 @@ function parseIn(){
 }
 
 function parseDivs(){
-   // overloop divs
-   var divs = document.getElementsByTagName('div');
    //	divs[0].style.display = 'none'; // hide advertisements
    for( var i = 0, oElement; oElement = divs[i]; i++ ) {
       
@@ -883,7 +874,6 @@ function parseDivs(){
 }
 
 function parseBolds(){
-   var bolds = document.getElementsByTagName('b');
    for( var i = 0, oElement; oElement = bolds[i]; i++ ) {
       var buildingaction = '';
       var a = oElement.innerHTML.match(/^Amount delivered per hour: (\d+) units$/);
@@ -1137,9 +1127,8 @@ function addGlobalStyle(css) {
 
 function getPlayerName(){
    // get player name
-   var divs = document.getElementsByTagName('div')[0];
-   if(divs.className == 'player'){
-      var bolds = divs.getElementsByTagName('b');
+   if(divs[0] && divs[0].className == 'player'){
+      var bolds = divs[0].getElementsByTagName('b');
       if(bolds.length == 1){
          playername = bolds[0].innerHTML;
       }
@@ -1148,15 +1137,13 @@ function getPlayerName(){
 
 function getIslandCoords(){
    //get Island Coordinates
-   var divs = document.getElementsByTagName('div')[2];
-   if(divs.className == 'island'){
-      var spans = divs.getElementsByTagName('span')[1];
+   if(divs[2] && divs[2].className == 'island'){
+      var spans = divs[2].getElementsByTagName('span')[1];
       curIslandCoor = spans.innerHTML;
    }
 }
 
 function addUpdateSection(){
-   var divs = document.getElementsByTagName('div');
    var newdiv;
    for(var i=0; i<divs.length; i++){
       if(divs[i].className == 'navigation'){
@@ -1533,8 +1520,6 @@ function parseHarbourEvents(s, isle){
 }
 
 function addTableElements(){
-   
-   var tables = document.getElementsByTagName('table');
    if (tables[1] && tables[1].className == 'table') { // list page, alliance pages, random island page
       var rows = tables[1].getElementsByTagName('tr');
       // on lab page a table can have 0 rows (probably research table after research is all done)
@@ -2215,6 +2200,16 @@ var imtitles = new Array();
 imtitles['gold.gif'] = 'Gold';
 imtitles['stones.gif'] = 'Stone';
 imtitles['wood.gif'] = 'Lumber';
+
+var tables = document.getElementsByTagName('table');
+
+var cells = document.getElementsByTagName('td');
+
+var divs = document.getElementsByTagName('div');
+
+var bolds = document.getElementsByTagName('b');
+
+var inputs = document.getElementsByTagName('input');
 
 // go
 
