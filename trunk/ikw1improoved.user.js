@@ -5,6 +5,36 @@
 // @include        http://213.203.194.123/us/1/index.php?s=*
 // ==/UserScript==
 
+/*
+
+GreaseMonkey Inselkampf helper: Helps you with a better UI and more info in the 
+game.
+
+This program is an adaptation of the lambik opera javascript program for 
+GreaseMonkey on Firefox, features has been added to it, but the lambik opera 
+javascript was the starting point.
+
+Copyright (C) 2007  Gaouar Manil
+
+Version: $Id: ikw1improoved.user.js 58 2007-11-20 08:22:13Z manil.gaouar $
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+http://www.gnu.org/licenses/lgpl.html
+
+*/
 Array.prototype.unique = function( b ) {
    var a = [], i, l = this.length;
    for( i=0; i<l; i++ ) {
