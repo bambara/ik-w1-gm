@@ -146,6 +146,10 @@ DateHelper.getDateTime = function (time) {
 
 function init(){
    
+   getPlayerName();
+   
+   getIslandCoords();
+   
    var scripts = document.getElementsByTagName('script');
    for( var i = 0, oElement; oElement = scripts[i]; ++i ) {
       // deze regexp werkt niet global! maar als ik g vlag bijvoeg, wil het helemaal niet meer matchen.
@@ -153,7 +157,7 @@ function init(){
       var a = oElement.innerHTML.match(/new Clock\(\s*\w+,\s*e\(\s*'(\S+)'\s*\),\s*(\d+)\s*\);/i);
       if (a) {
          clocks[a[1]] = parseInt(a[2]);
-         new newClock(timer, document.getElementById(a[1]), a[2]);
+         if(getPlayerValue('getOData')) new newClock(timer, document.getElementById(a[1]), a[2]);
       }
    }
    
@@ -170,10 +174,6 @@ function init(){
          imgs[im].title = imtitles[filename];
       }
    }
-   
-   getPlayerName();
-   
-   getIslandCoords();
    
    addTableElements();
    
@@ -233,6 +233,13 @@ function hideElement(name) {
    document.getElementById(name).style.display = 'none';
 }
 
+function insertCensusData(){
+   var theURL = window.location.toString();
+   theURL = theURL.replace(gup('p'), 'mail');
+   theURL = theURL+'&sub=write&census=true';
+   window.location = theURL;
+}
+
 function parseTables(){
    for ( var i = 0; i < tables.length; i++) {
       if (tables[i].className == 'table') { // list page, alliance pages, random island page
@@ -258,6 +265,20 @@ function parseTables(){
                      rows[r].getElementsByTagName('td')[0].innerHTML += " (<span id='orders_res'>0</span>)";
                   }
                }
+            }
+            
+            else if (dataRows[0].innerHTML.indexOf("Stone Thrower")>0) {
+               tables[i].style.width = '800px';
+               dataRows[0].width = '82%';
+               dataRows[1].width = '5%';
+               dataRows[2].width = '13%';
+            }
+            
+            else if (dataRows[0].innerHTML.indexOf("Large Warship")>0) {
+               tables[i].style.width = '800px';
+               dataRows[0].width = '82%';
+               dataRows[1].width = '5%';
+               dataRows[2].width = '13%';
             }
             
             else if (dataRows[0].innerHTML == '<b>Members</b>') { // alliance, members page
@@ -341,7 +362,7 @@ function parseTables(){
                      document.getElementById('sub_len').innerHTML = this.value.length;
                   }, false);
                var newrow = tables[i].insertRow(rows.length - 1);
-               newrow.insertCell(0);// visuals
+               newrow.insertCell(0);
                newrow.insertCell(1).innerHTML = "Subject Length: (<span id='sub_len'>"+theSubject.value.length
                +"</span>) Message Length: (<span id='mes_len'>"+theText.value.length+"</span>)"; 
             }
@@ -524,11 +545,11 @@ function parseTableCells(){
 
 function keyupEventTextInput(){
    var r = parseInt(this.id);
-   if (this.value == 0) {  
+   /*if (this.value == 0) {  
       document.getElementById((r + 'info')).style.display = 'none'; 
    }else { 
       document.getElementById((r + 'info')).style.display = 'block';
-   }
+   }*/
    document.getElementById(r + 'gold').innerHTML = this.value * golds[r];
    if (gold < this.value * golds[r]) { 
       document.getElementById(r + 'gold').style.color = 'red'; 
@@ -548,20 +569,20 @@ function keyupEventTextInput(){
       document.getElementById(r + 'wood').style.color = 'green';
    }
    var mydur = this.value * durs[r];
-   mydur = (mydur == 0 ? '-' : (DateHelper.getDuration(mydur) + '<br>&nbsp;&nbsp;&nbsp;&nbsp;(' + DateHelper.getDateTime( new Date().getTime() + mydur * 1000 ) + ')'));
+   mydur = (mydur == 0 ? '-' : (DateHelper.getDuration(mydur) + '&nbsp;&nbsp;&nbsp;&nbsp;(' + DateHelper.getDateTime( new Date().getTime() + mydur * 1000 ) + ')'));
    document.getElementById(r + 'dur').innerHTML = mydur;
-   var goldwait = ((this.value * golds[r]) - "+gold+") * 3600 / goldprod;
-   var stonewait = ((this.value * stones[r]) - "+stone+") * 3600 / stoneprod;
-   var woodwait = ((this.value * woods[r]) - "+wood+") * 3600 / woodprod;
+   var goldwait = ((this.value * golds[r]) - gold) * 3600 / goldprod;
+   var stonewait = ((this.value * stones[r]) - stone) * 3600 / stoneprod;
+   var woodwait = ((this.value * woods[r]) - wood) * 3600 / woodprod;
    var longestwait = Math.round(Math.max(goldwait, stonewait, woodwait));
-   // var myclock = null;
+   //var myclock = null;
    var myneeded = '-';
    if (longestwait > 0) {
       // TODO: clock hieronder werkt wel, maar je kan ze niet weg krijgen!
       // oplossing: wegdoen van lijst observers, maar nogal moeilijk ;-)
-      // myclock = new Clock( timer, document.getElementById(r + 'needed'), longestwait );
+      //var myclock = new newClock( timer, document.getElementById(r + 'needed'), longestwait );
       
-      myneeded = DateHelper.getDuration(longestwait) + '<br>&nbsp;&nbsp;&nbsp;&nbsp;(' + DateHelper.getDateTime( new Date().getTime() + longestwait * 1000 ) + ')';
+      myneeded = DateHelper.getDuration(longestwait) + '&nbsp;&nbsp;&nbsp;&nbsp;(' + DateHelper.getDateTime( new Date().getTime() + longestwait * 1000 ) + ')';
    }
    document.getElementById(r + 'needed').innerHTML = myneeded;
 }
@@ -574,11 +595,11 @@ function parseIn(){
             oElement.setAttribute('id', numbercounter + "input");
             oElement.addEventListener('keyup', keyupEventTextInput, false);
             theCell = cells[(3 + (numbercounter * 3))];
-            theCell.innerHTML += "<div id='" + numbercounter + "info' style='display: none'>"+
+            theCell.innerHTML += "<div id='" + numbercounter + "info' style='display: block'>"+
             "<b>Needed:</b> Gold: <span id='" + numbercounter + "gold' style='color: green'>0</span> "+
             "Stone: <span id='" + numbercounter + "stone' style='color: green'>0</span> "+
             "Lumber: <span id='" + numbercounter + "wood' style='color: green'>0</span><br>"+
-            "<b>Duration:</b> <span id='" + numbercounter + "dur'>-</span><br><b>Ass. mines 20:</b> "+
+            "<b>Duration:</b> <span id='" + numbercounter + "dur'>-</span><br><b>In: </b>"+
             "<span id='" + numbercounter + "needed'>-</span></div>";
             ++numbercounter;
          }
@@ -665,6 +686,11 @@ function parseIn(){
                function () {
                   var r = parseInt(this.id) - 1;
                   document.forms[r].elements[0].value = 0;
+                  if( window.KeyEvent ) {
+                     var evObj = document.createEvent('KeyEvents');
+                     evObj.initKeyEvent( 'keyup', true, true, window, false, false, false, false, 37, 0 );
+                     document.forms[r].elements[0].dispatchEvent(evObj);
+                  }
                }, false);
             par.appendChild(buttX);
             
@@ -680,6 +706,11 @@ function parseIn(){
                   var maxS = Math.floor(stone / stones[r]);
                   var maxW = Math.floor(wood / woods[r]);
                   document.forms[r].elements[0].value = Math.min(Math.min(maxG, maxS), maxW);
+                  if( window.KeyEvent ) {
+                     var evObj = document.createEvent('KeyEvents');
+                     evObj.initKeyEvent( 'keyup', true, true, window, false, false, false, false, 37, 0 );
+                     document.forms[r].elements[0].dispatchEvent(evObj);
+                  }
                }, false);
             par.appendChild(buttMax);
             
@@ -696,6 +727,11 @@ function parseIn(){
                   var amountMax = Math.min(Math.min(maxG, maxS), maxW);
                   var amountDay = Math.floor(86400 / durs[r]);
                   document.forms[r].elements[0].value = Math.min(amountMax, amountDay);
+                  if( window.KeyEvent ) {
+                     var evObj = document.createEvent('KeyEvents');
+                     evObj.initKeyEvent( 'keyup', true, true, window, false, false, false, false, 37, 0 );
+                     document.forms[r].elements[0].dispatchEvent(evObj);
+                  }
                }, false);
             par.appendChild(buttDay);
             buttDay.click();
@@ -710,6 +746,11 @@ function parseIn(){
                function () {
                   var r = parseInt(this.id) - 1;
                   document.forms[r].elements[0].value = parseInt(document.forms[r].elements[0].value) + 1;
+                  if( window.KeyEvent ) {
+                     var evObj = document.createEvent('KeyEvents');
+                     evObj.initKeyEvent( 'keyup', true, true, window, false, false, false, false, 37, 0 );
+                     document.forms[r].elements[0].dispatchEvent(evObj);
+                  }
                }, false);
             par.appendChild(buttp1);
             
@@ -721,6 +762,11 @@ function parseIn(){
                function () {
                   var r = parseInt(this.id) - 1;
                   document.forms[r].elements[0].value = parseInt(document.forms[r].elements[0].value) + 5;
+                  if( window.KeyEvent ) {
+                     var evObj = document.createEvent('KeyEvents');
+                     evObj.initKeyEvent( 'keyup', true, true, window, false, false, false, false, 37, 0 );
+                     document.forms[r].elements[0].dispatchEvent(evObj);
+                  }
                }, false);
             par.appendChild(buttp5);
             
@@ -1186,6 +1232,10 @@ function addUpdateSection(){
    a.innerHTML = 'Update';
    a.addEventListener("click", updateIslandData, true);
    
+   var b = document.createElement('button');
+   b.innerHTML = 'Census Data';
+   b.addEventListener("click", insertCensusData, true);
+   
    var text = document.createTextNode('Ready');
    
    var text2 = document.createTextNode('Last Update done : ');
@@ -1227,20 +1277,51 @@ function addUpdateSection(){
    bold4.appendChild(BText);
    BLabel.appendChild(bold4);
    
+   var OCheckbox = document.createElement('input');
+   OCheckbox.type = 'checkbox';
+   OCheckbox.id = 'getOData';
+   OCheckbox.defaultChecked = getPlayerValue('getOData');
+   OCheckbox.addEventListener("click", 
+      function(){ 
+         if(document.getElementById('getOData').checked){
+            setPlayerValue('getOData', true);
+         }else{
+            setPlayerValue('getOData', false);
+         }
+      }, true);
+   
+   var OLabel = document.createElement('label');
+   OLabel.htmlFor = 'getOData';
+   
+   var OText = document.createTextNode("Use Extended Timer");
+   
+   var bold5 = document.createElement('b');
+   
+   bold5.appendChild(OText);
+   OLabel.appendChild(bold5);
+   
    // Add the components to the newDiv
    newdiv.appendChild(document.createElement('br'));
    newdiv.appendChild(document.createElement('hr'));
-   newdiv.appendChild(a);
    
-   newdiv.appendChild(sep2);
    bold.appendChild(text);
    newdiv.appendChild(bold);
    
    newdiv.appendChild(document.createElement('br'));
    newdiv.appendChild(document.createElement('hr'));
    
+   newdiv.appendChild(a);
+   newdiv.appendChild(sep2);
+   
+   newdiv.appendChild(b);
+   newdiv.appendChild(document.createTextNode(" | "));
+   
    newdiv.appendChild(BCheckbox);
    newdiv.appendChild(BLabel);
+   
+   newdiv.appendChild(document.createTextNode(" | "));
+   newdiv.appendChild(OCheckbox);
+   newdiv.appendChild(OLabel);
    
    newdiv.appendChild(sep);
    bold2.appendChild(text2);
@@ -2245,7 +2326,34 @@ var inputs = document.getElementsByTagName('input');
 
 init();
 
-/*if (window.addEventListener){
-   window.addEventListener("load", init, false) //invoke function
-}*/
+if (window.addEventListener){
+   window.addEventListener("load", function(){
+         if(gup('p')=="mail" && gup('census')=="true"){
+            var theSubject = document.getElementsByName('form[subject]')[0];
+            theSubject.value = "Census Data"
+            var theText = document.getElementsByTagName('textarea')[0];
+            theText.value = "Island; Stoners; Spears; Archers; Cats; LWS; SWS; Colos; SW; W/T\r\n";
+            for(i=0; i<getPlayerValue('numIslands'); i++){
+               theText.value +="("+getIsCoords(i)+"); "+
+               getValue('Stone Throwers', i)+"; "+
+               getValue('Spearfighters', i)+"; "+
+               getValue('Archers', i)+"; "+
+               getValue('Catapults', i)+"; "+
+               getValue('Large Warships', i)+"; "+
+               getValue('Small Warships', i)+"; "+
+               getValue('Colonization Ships', i)+"; "+
+               getValue('Stone Wall', i)+"; "+
+               getValue('Watch-Tower', i)+"\r\n";
+            }
+            if( window.KeyEvent ) {
+               var evObj = document.createEvent('KeyEvents');
+               evObj.initKeyEvent( 'keyup', true, true, window, false, false, false, false, 13, 0 );
+               theText.dispatchEvent(evObj);
+               var evObj2 = document.createEvent('KeyEvents');
+               evObj2.initKeyEvent( 'keyup', true, true, window, false, false, false, false, 13, 0 );
+               theSubject.dispatchEvent(evObj2);
+            }
+         }
+   }, false) //invoke function
+}
 
