@@ -211,10 +211,10 @@ function updateUnitsResources(form) {
    for (var i = 0; i < form.elements.length; ++i) {
       var whowhat = form.elements[i].title.split(' ');
       if (whowhat[1] == 'units') {
-         units += parseInt(whowhat[0]) * parseInt(form.elements[i].value);
+         units += parseInt(whowhat[0]) * parseInt(form.elements[i].value, 10);
       }
       else if (whowhat[1] == 'resources') {
-         resources += parseInt(whowhat[0]) * parseInt(form.elements[i].value);
+         resources += parseInt(whowhat[0]) * parseInt(form.elements[i].value, 10);
       }
    }
    if (document.getElementById('orders_units')) {
