@@ -9,15 +9,11 @@ Greasemonkey Addon: https://addons.mozilla.org/en-US/firefox/addon/748
 
 If you already have Firefox and Greasemonkey installed, you can safely skip to step 3.
 
-1. You'll want an up to date version of Firefox and the latest version of the GreaseMonkey addon to run the script.
-
-2. After installing Greasemonkey you'll be asked to restart Firefox once the addon has been installed.
- 
-3. If you have a previous version of this script installed, you'll want to disable it via the "Manage User Scripts..." context menu for Greasemonkey. Within the dialog window that appears you can either disable or uninstall previous versions.
-
-4. With Greasemonkey enabled, you can then fetch and install the latest version of the script here: http://code.google.com/p/ik-w1-gm/downloads/list
-
-5. Once installed, you're done. The script should now run when Greasemonkey is enabled while you're playing your game.
+  # You'll want an up to date version of Firefox and the latest version of the Greasemonkey addon to run the script.
+  # After installing Greasemonkey you'll be asked to restart Firefox once the addon has been installed.
+  # If you have a previous version of this script installed, you'll want to disable it via the "Manage User Scripts..." context menu for Greasemonkey. Within the dialog window that appears you can either disable or uninstall previous versions.
+  # With Greasemonkey enabled, you can then fetch and install the latest version of the script here: http://code.google.com/p/ik-w1-gm/downloads/list
+  # Once installed, you're done. The script should now run when Greasemonkey is enabled while you're playing your game.
 
 ----
 
