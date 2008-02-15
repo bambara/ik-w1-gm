@@ -1,10 +1,21 @@
-How to install the script
+How to install the script.
 
-= Introduction =
+== Instructions ==
+If you already have [http://getfirefox.com/|Firefox] and the [https://addons.mozilla.org/en-US/firefox/addon/748|GreaseMonkey addon], you can safely skip to step 3.
 
-How to install
+1. You'll want an up to date version of [http://getfirefox.com/|Firefox] and the latest version of the [https://addons.mozilla.org/en-US/firefox/addon/748|GreaseMonkey addon] to run the script.
 
+2. After installing [https://addons.mozilla.org/en-US/firefox/addon/748|GreaseMonkey] you'll be asked to restart [http://getfirefox.com/|Firefox] once the addon has been installed.
+ 
+3. If you have a previous version of this script installed, you'll want to disable it via the "Manage User Scripts..." context menu for GreaseMonkey. Within the dialog window that appears you can either disable or uninstall previous versions.
 
-= Details =
+4. With GreaseMonkey enabled, you can then fetch and install [http://code.google.com/p/ik-w1-gm/downloads/list|the latest version of the script here].
 
-More info to come
+5. You're done. The script should now run when GreaseMonkey is enabled while you're playing your game.
+
+----
+
+== Trouble Shooting ==
+In some cases, if the script does not appear to be working after just installing it. You might need to restart Firefox before it takes effect.
+
+When installing a new version, your previous census counts will disappear. You will need to rebuild them again.
